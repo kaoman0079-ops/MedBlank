@@ -24,7 +24,6 @@
 
         .container { padding: 40px 15px 60px; max-width: 500px; margin: 0 auto; }
         
-        /* 総合ポータルへ戻るボタン */
         .back-portal {
             display: inline-flex; align-items: center; padding: 6px 12px;
             background-color: var(--card-bg); border: 1px solid var(--border-color);
@@ -56,7 +55,6 @@
         .card-title { font-size: 1.2rem; font-weight: 800; }
         .card-desc { font-size: 0.85rem; color: var(--text-dim); font-weight: 600; }
 
-        /* アプリごとのテーマカラー */
         .card-blank { border-left: 6px solid var(--accent-blue); }
         .card-blank .card-title { color: var(--accent-blue); }
         
@@ -69,6 +67,7 @@
 <body>
 
     <div class="container">
+        <!-- 総合ポータル（Meridian-Node）へ戻るリンク -->
         <a href="https://kaoman0079-ops.github.io/Meridian-Node/" class="back-portal">
             <span>⏎</span> <span>総合ポータルへ戻る</span>
         </a>
@@ -77,6 +76,7 @@
         <div class="subtitle">学習アプリメニュー</div>
 
         <div class="menu-grid">
+            <!-- ① 穴埋め暗記アプリへのリンク -->
             <a href="blank.html" class="menu-card card-blank">
                 <div class="card-left">
                     <span class="card-title">① 穴埋め暗記カード</span>
@@ -85,6 +85,7 @@
                 <span class="arrow">➔</span>
             </a>
 
+            <!-- ② 4択問題演習アプリへのリンク -->
             <a href="quiz4.html" class="menu-card card-quiz">
                 <div class="card-left">
                     <span class="card-title">② 4択問題演習マスター</span>
