@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>臨床医学各論 4択問題マスター</title>
+    <style>
+        :root {
+            --main-bg: #F8F9FA;
+            --card-bg: #FFFFFF;
+            --accent-blue: #3498DB;
+            --accent-green: #2ECC71;
+            --accent-red: #E74C3C;
+            --text-main: #2C3E50;
+            --text-dim: #7F8C8D;
+            --border-color: #E1E8ED;
+        }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background-color: var(--main-bg); 
+            margin: 0; padding: 0; 
+            color: var(--text-main);
+            -webkit-text-size-adjust: 100%;
+        }
+
+        .container { padding: 20px 15px 60px; max-width: 600px; margin: 0 auto; }
+        
+        .back-portal {
+            display: inline-flex; align-items: center; padding: 6px 12px;
+            background-color: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 20px; color: var(--text-main); text-decoration: none;
+            font-size: 0.85rem; font-weight: bold; margin-bottom: 10px;
+        }
+
+        h1 { font-size: 1.6rem; font-weight: 800; margin: 10px 0 5px; text-align: center; }
+        .subtitle { font-size: 0.85rem; color: var(--text-dim); text-align: center; font-weight: 600; margin-bottom: 25px; }
+
+        section { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 18px; margin-bottom: 15px; }
+        h3 { margin: 0 0 12px 0; font-size: 0.9rem; font-weight: 800; color: var(--text-main); }
+
+        .start-btn, .action-btn {
+            width: 100%; padding: 14px; font-size: 1rem; border-radius: 12px;
+            font-weight: 800; border: none; cursor: pointer; transition: transform 0.1s;
+            box-sizing: border-box; text-align: center;
+        }
+        .start-btn { background-color: #E67E22; color: #FFF; box-shadow: 0 4px 6px rgba(230, 126, 34, 0.2); }
+        .action-btn { background-color: #E9ECEF; color: var(--text-main); margin-top: 10px; }
+        .start-btn:active { transform: scale(0.98); }
+
+        .quiz-view, .setup-view { display: none; }
+        .progress-bar { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-dim); font-weight: bold; margin-bottom: 10px; padding: 0 5px; }
+
+        .question-card {
+            background-color: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 24px; padding: 25px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 15px;
+        }
+
+        .card-tag { 
+            font-size: 1.1rem; font-weight: 800; color: #E67E22; 
+            display: block; text-align: center; margin-bottom: 15px; padding-bottom: 8px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .question-text { font-size: 1.15rem; font-weight: 700; line-height: 1.7; margin: 0 0 20px 0; word-break: break-all; }
+        
+        /* 選択肢ボタンのスタイル */
+        .choices-group { display: flex; flex-direction: column; gap: 10px; }
+        .choice-btn {
+            width: 100%; padding: 14px; font-size: 1rem; font-weight: 700; text-align: left;
+            background-color: #FFF; border: 2px solid var(--border-color); border-radius: 12px;
+            cursor: pointer; transition: background-color 0.2s, border-color 0.2s;
+            box-sizing: border-box; display: flex; align-items: center;
+        }
+        .choice-btn:active:not(:disabled) { background-color: #F0F4F8; }
+        .choice-num { background-color: #E9ECEF; color: var(--text-main); width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 0.85rem; font-weight: 800; flex-shrink: 0; }
+        
+        /* 正解・不正解の演出スタイル */
+        .choice-btn.correct { background-color: #E8F8F5; border-color: var(--accent-green); color: #117A65; }
+        .choice-btn.correct .choice-num { background-color: var(--accent-green); color: #FFF; }
+        .choice-btn.wrong { background-color: #FDEDEC; border-color: var(--accent-red); color: #C0392B; text-decoration: line-through; }
+        .choice-btn.wrong .choice-num { background-color: var(--accent-red); color: #FFF; }
+
+        /* 解説ゾーン */
+        .explain-zone {
+            background-color: #FEF9E7; border: 1px solid #F9E79F; border-radius: 18px;
+            padding: 18px; margin-top: 20px; display: none;
+        }
+        .explain-title { font-weight: 800; font-size: 1rem; color: #B7950B; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .explain-text { font-size: 0.95rem; font-weight: 700; line-height: 1.6; margin: 0; color: #7D6608; }
+
+        .next-container { margin-top: 15px; display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <a href="index.html" class="back-portal" id="back-button" onclick="handleBackClick(event)">
+            <span id="back-icon">⏎</span> <span id="back-text">戻る</span>
+        </a>
+
+        <h1>臨床医学各論</h1>
+        <div class="subtitle">4択問題演習マスター</div>
+
+        <div id="setup-view" class="setup-view" style="display: block;">
+            <section>
+                <h3>出題順序</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <label style="background: #fff; border: 1px solid #ced4da; padding: 12px; text-align: center; border-radius: 12px; font-weight: bold; cursor: pointer;">
+                        <input type="radio" name="order" value="shuffle" checked style="margin-right: 5px;">ランダム
+                    </label>
+                    <label style="background: #fff; border: 1px solid #ced4da; padding: 12px; text-align: center; border-radius: 12px; font-weight: bold; cursor: pointer;">
+                        <input type="radio" name="order" value="normal" style="margin-right: 5px;">標準順
+                    </label>
+                </div>
+            </section>
+            <button class="start-btn" onclick="startQuiz()">4択演習を開始する 🚀</button>
+        </div>
+
+        <div id="quiz-view" class="quiz-view">
+            <div class="progress-bar">
+                <span id="current-index">第 1 問</span>
+            </div>
+
+            <div class="question-card">
+                <div class="card-tag" id="card-tag">カテゴリ</div>
+                <div class="question-text" id="question-text">問題文</div>
+                
+                <div class="choices-group" id="choices-group">
+                    </div>
+
+                <div class="explain-zone" id="explain-zone">
+                    <div class="explain-title">💡 解説・国試ポイント</div>
+                    <div class="explain-text" id="explain-text">解説文</div>
+                </div>
+            </div>
+            
+            <div class="next-container" id="next-container">
+                <button class="start-btn" onclick="nextQuestion()">次の問題へ進む ➔</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 提供いただいた4択データをそのまま配列化
+        const quizData = [
+            { category: "呼吸器 (上気道感染)", question: "成人のかぜ症候群の病原体として最も多いのはどれか？", choices: ["ライノウイルス", "マイコプラズマ", "インフルエンザ菌", "RSウイルス"], answer: "ライノウイルス", explanation: "かぜ症候群の約80〜90%はウイルス感染であり、成人では特にライノウイルスが最も多い。RSウイルスは小児に多く、マイコプラズマは非定型肺炎の原因である。" },
+            { category: "呼吸器 (肺炎)", question: "急性肺炎の検査所見で誤っているのはどれか？", choices: ["赤沈亢進", "CRP陽性", "好中球増多", "血小板増多"], answer: "血小板増多", explanation: "急性肺炎では炎症反応としてCRP上昇、赤沈亢進、好中球増多がみられる。血小板増多は典型的ではない。" },
+            { category: "呼吸器 (肺炎)", question: "マイコプラズマ肺炎で正しい記述はどれか？", choices: ["ウイルス性である", "水痘様発疹が出る", "頑固な咳を伴う", "成人に感染しない"], answer: "頑固な咳を伴う", explanation: "マイコプラズマは細菌でありウイルスではない。特徴は乾性の持続する咳嗽であり、成人にも感染する。" },
+            { category: "呼吸器 (肺炎)", question: "市中肺炎の病原体で最も多いのはどれか？", choices: ["マイコプラズマ", "インフルエンザ菌", "肺炎球菌", "緑膿菌"], answer: "肺炎球菌", explanation: "市中肺炎の最多原因菌は肺炎球菌である。非定型肺炎はマイコプラズマが多く、緑膿菌は院内感染に多い。" },
+            { category: "呼吸器 (感染総論)", question: "呼吸器感染症について正しいのはどれか？", choices: ["上気道炎は抗菌薬で治療", "65歳以上に肺炎球菌ワクチン推奨", "インターフェロンγは非結核性抗酸菌で陽性", "日本は結核が少ない"], answer: "65歳以上に肺炎球菌ワクチン推奨", explanation: "高齢者では肺炎重症化のリスクが高いためワクチン接種が推奨される。上気道炎は多くがウイルス性で抗菌薬は基本不要。" },
+            { category: "呼吸器 (症候)", question: "咳・痰について正しいのはどれか？", choices: ["痰あり＝乾性咳嗽", "喘息発作時は咳なし", "血痰少量なら問題なし", "誤嚥時の咳は防御反応"], answer: "誤嚥時の咳は防御反応", explanation: "咳は気道異物排除の防御機構であり誤嚥時に重要。乾性咳嗽は痰を伴わない咳である。" },
+            { category: "呼吸器 (結核)", question: "肺結核について正しいのはどれか？", choices: ["肺炎球菌感染", "発熱しない", "胸部X線有用", "ステロイド治療"], answer: "胸部X線有用", explanation: "肺結核では胸部X線で浸潤影や空洞が確認でき診断に有用である。原因は結核菌であり、通常発熱を伴う。" },
+            { category: "呼吸器 (COPD)", question: "COPDで正しいのはどれか？", choices: ["喫煙は無関係", "拘束性障害", "閉塞性障害", "喘鳴主体"], answer: "閉塞性障害", explanation: "COPDは気流制限を特徴とする閉塞性換気障害であり、主原因は喫煙である。" },
+            { category: "呼吸器 (肺気腫)", question: "肺気腫について誤っているのはどれか？", choices: ["ビール樽状胸郭", "1秒率低下", "透過性亢進", "酸素分圧上昇"], answer: "酸素分圧上昇", explanation: "肺気腫ではガス交換障害により低酸素血症となるため酸素分圧は低下する。" },
+            { category: "呼吸器 (喘息)", question: "気管支喘息について誤っているのはどれか？", choices: ["炎症性疾患", "気道狭窄", "発作で呼吸困難", "拘束性障害"], answer: "拘束性障害", explanation: "喘息は可逆性の閉塞性障害であり拘束性ではない。気道炎症と過敏性亢進が本態である。" },
+            { category: "呼吸器 (肺癌)", question: "肺癌の診断で有用でないのはどれか？", choices: ["喀痰検査", "気管支鏡", "CT", "スパイログラフィー"], answer: "スパイログラフィー", explanation: "肺機能検査は診断より評価目的で使われ、腫瘍診断には画像検査や細胞診が重要。" },
+            { category: "呼吸器 (気胸)", question: "自然気胸で正しいのはどれか？", choices: ["女性に多い", "肥満に多い", "胸痛を伴う", "緊急性なし"], answer: "胸痛を伴う", explanation: "自然気胸は若年のやせ型男性に多く、突然の胸痛と呼吸困難を呈する。緊張性では緊急処置が必要。" },
+            { category: "内分泌 (成長ホルモン異常)", question: "巨人症でみられないのはどれか？", choices: ["発汗過多", "高血圧", "筋緊張亢進", "月経異常"], answer: "筋緊張亢進", explanation: "巨人症はGH過剰により発汗・代謝亢進・高血圧などを呈するが筋緊張亢進は特徴ではない。" },
+            { category: "内分泌 (甲状腺機能亢進)", question: "バセドウ病でみられる症候はどれか？", choices: ["手指振戦", "寒がり", "眼瞼下垂", "徐脈"], answer: "手指振戦", explanation: "甲状腺ホルモン過剰により交感神経亢進し振戦・頻脈・発汗がみられる。" },
+            { category: "内分泌 (副腎不全)", question: "アジソン病でみられないのはどれか？", choices: ["易疲労性", "色素沈着", "高血圧", "無月経"], answer: "高血圧", explanation: "副腎皮質機能低下により低血圧・色素沈着・倦怠感がみられる。" },
+            { category: "内分泌 (アルドステロン)", question: "原発性アルドステロン症で再吸収が亢進するのはどれか？", choices: ["Na", "K", "H", "Ca"], answer: "Na", explanation: "アルドステロンはNa再吸収とK排泄を促進し、高血圧・低カリウム血症を引き起こす。" }
+        ];
+
+        let queue = [];
+        let currentIndex = 0;
+        let appState = 'setup';
+
+        function startQuiz() {
+            const order = document.querySelector('input[name="order"]:checked').value;
+            queue = [...quizData];
+            if (order === 'shuffle') {
+                queue.sort(() => Math.random() - 0.5);
+            }
+            currentIndex = 0;
+            appState = 'quiz';
+            document.getElementById('setup-view').style.display = 'none';
+            document.getElementById('quiz-view').style.display = 'block';
+            updateBackButton();
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const item = queue[currentIndex];
+            document.getElementById('current-index').innerText = `問題 ${currentIndex + 1} / ${queue.length}`;
+            document.getElementById('card-tag').innerText = item.category;
+            document.getElementById('question-text').innerText = item.question;
+
+            const choicesContainer = document.getElementById('choices-group');
+            choicesContainer.innerHTML = '';
+            document.getElementById('explain-zone').style.display = 'none';
+            document.getElementById('next-container').style.display = 'none';
+
+            item.choices.forEach((choice, index) => {
+                const button = document.createElement('button');
+                button.className = 'choice-btn';
+                button.innerHTML = `<span class="choice-num">${index + 1}</span> ${choice}`;
+                button.onclick = () => selectChoice(button, choice, item.answer, item.explanation);
+                choicesContainer.appendChild(button);
+            });
+        }
+
+        function selectChoice(selectedButton, chosenAnswer, correctAnswer, explanation) {
+            const buttons = document.querySelectorAll('.choice-btn');
+            
+            // 全ボタンをタップ不可にする
+            buttons.forEach(btn => btn.disabled = true);
+
+            // 正誤判定のクラス付与
+            buttons.forEach(btn => {
+                const text = btn.innerText.replace(/^\d+\s/, ''); // 数字部分を取り除いて比較
+                if (text === correctAnswer) {
+                    btn.classList.add('correct');
+                } else if (btn === selectedButton && chosenAnswer !== correctAnswer) {
+                    btn.classList.add('wrong');
+                }
+            });
+
+            // 解説を表示
+            document.getElementById('explain-text').innerText = explanation;
+            document.getElementById('explain-zone').style.display = 'block';
+            document.getElementById('next-container').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex < queue.length) {
+                showQuestion();
+            } else {
+                alert('すべての問題が終了しました！お疲れ様でした。');
+                resetApp();
+            }
+        }
+
+        function resetApp() {
+            appState = 'setup';
+            updateBackButton();
+            document.getElementById('quiz-view').style.display = 'none';
+            document.getElementById('setup-view').style.display = 'block';
+        }
+
+        function handleBackClick(event) {
+            if (appState === 'quiz') {
+                event.preventDefault();
+                if (confirm("演習を中断してメニューに戻りますか？")) {
+                    resetApp();
+                }
+            }
+        }
+
+        function updateBackButton() {
+            const textEl = document.getElementById("back-text");
+            if (appState === 'quiz') {
+                textEl.innerText = "中断してメニューへ";
+            } else {
+                textEl.innerText = "ポータルへ戻る";
+            }
+        }
+    </script>
+</body>
+</html>
