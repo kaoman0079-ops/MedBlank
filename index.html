@@ -37,6 +37,24 @@
         section { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 18px; margin-bottom: 15px; }
         h3 { margin: 0 0 12px 0; font-size: 0.9rem; font-weight: 800; color: var(--text-main); }
 
+        /* カード選択エリアのスタイル */
+        .select-controls { display: flex; gap: 10px; margin-bottom: 12px; }
+        .select-sub-btn { 
+            flex: 1; padding: 6px; font-size: 0.8rem; font-weight: bold; 
+            border: 1px solid var(--border-color); background: #FFF; border-radius: 6px; cursor: pointer; 
+        }
+        .card-selector-grid {
+            display: grid; grid-template-columns: 1fr; gap: 6px; 
+            max-height: 250px; overflow-y: auto; padding-right: 5px;
+            border: 1px solid #E9ECEF; padding: 8px; border-radius: 8px; background: #FAFAFA;
+        }
+        .card-select-item {
+            display: flex; align-items: center; padding: 8px; background: #FFF;
+            border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; font-weight: 700; cursor: pointer;
+        }
+        .card-select-item input { margin-right: 10px; transform: scale(1.1); }
+        .card-num-badge { font-size: 0.75rem; color: var(--text-dim); margin-right: 8px; background: #E9ECEF; padding: 2px 6px; border-radius: 4px; min-width: 20px; text-align: center; }
+
         .start-btn, .action-btn {
             width: 100%; padding: 14px; font-size: 1rem; border-radius: 12px;
             font-weight: 800; border: none; cursor: pointer; transition: transform 0.1s;
@@ -54,15 +72,9 @@
             border-radius: 24px; padding: 25px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 15px;
         }
 
-        /* 疾患名のスタイル修正：中央寄せ・大きめの文字 */
         .card-tag { 
-            font-size: 1.3rem; 
-            font-weight: 800; 
-            color: var(--accent-blue); 
-            display: block; 
-            text-align: center; 
-            margin-bottom: 20px; 
-            padding-bottom: 10px;
+            font-size: 1.3rem; font-weight: 800; color: var(--accent-blue); 
+            display: block; text-align: center; margin-bottom: 20px; padding-bottom: 10px;
             border-bottom: 1px dashed var(--border-color);
         }
 
@@ -74,20 +86,12 @@
             font-weight: 800; min-width: 40px; text-align: center;
         }
 
-        /* 答えが出た時のスタイル */
         .revealed-ans {
-            color: #E74C3C;
-            background-color: #FDEDEC;
-            border-bottom: 2px solid #E74C3C;
-            padding: 2px 5px;
-            border-radius: 4px;
-            font-weight: 800;
+            color: #E74C3C; background-color: #FDEDEC; border-bottom: 2px solid #E74C3C;
+            padding: 2px 5px; border-radius: 4px; font-weight: 800;
         }
 
-        .answer-zone {
-            background-color: #E8F8F5; border: 1px solid #A3E4D7; border-radius: 18px;
-            padding: 18px; margin-top: 20px; display: none;
-        }
+        .answer-zone { background-color: #E8F8F5; border: 1px solid #A3E4D7; border-radius: 18px; padding: 18px; margin-top: 20px; display: none; }
         .answer-title { font-weight: 800; font-size: 0.95rem; color: #117A65; margin-bottom: 10px; }
         .answer-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.95rem; font-weight: 700; }
 
@@ -104,10 +108,11 @@
         <h1>臨床医学各論</h1>
         <div class="subtitle">重要キーワード 穴埋めトレーニング</div>
 
+        <!-- 設定画面 -->
         <div id="setup-view" class="setup-view" style="display: block;">
             <section>
                 <h3>出題順序</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
                     <label style="background: #fff; border: 1px solid #ced4da; padding: 12px; text-align: center; border-radius: 12px; font-weight: bold; cursor: pointer;">
                         <input type="radio" name="order" value="shuffle" checked style="margin-right: 5px;">ランダム
                     </label>
@@ -115,10 +120,20 @@
                         <input type="radio" name="order" value="normal" style="margin-right: 5px;">カード番号順
                     </label>
                 </div>
+
+                <h3>出題するカードを選択</h3>
+                <div class="select-controls">
+                    <button type="button" class="select-sub-btn" onclick="selectAllCards(true)">すべて選択</button>
+                    <button type="button" class="select-sub-btn" onclick="selectAllCards(false)">すべて解除</button>
+                </div>
+                <div class="card-selector-grid" id="card-selector-grid">
+                    <!-- JavaScriptで動的に生成 -->
+                </div>
             </section>
-            <button class="start-btn" onclick="startQuiz()">演習開始 🚀</button>
+            <button class="start-btn" onclick="startQuiz()">選択したカードで演習開始 🚀</button>
         </div>
 
+        <!-- クイズ画面 -->
         <div id="quiz-view" class="quiz-view">
             <div class="progress-bar">
                 <span id="current-index">第 1 問</span>
@@ -136,7 +151,7 @@
                 <button class="start-btn" onclick="nextQuestion()" style="margin:0;">次のカード ➔</button>
             </div>
 
-            <div class="answer-zone" id="answer-zone" style="margin-top:20px;">
+            <div class="answer-zone" id="answer-zone">
                 <div class="answer-title">✅ 正解一覧</div>
                 <div class="answer-list" id="answer-list"></div>
             </div>
@@ -171,10 +186,43 @@
         let currentIndex = 0;
         let appState = 'setup';
 
+        // 画面立ち上げ時に選択用リストを生成
+        window.onload = function() {
+            const grid = document.getElementById('card-selector-grid');
+            data.forEach((item, index) => {
+                const label = document.createElement('label');
+                label.className = 'card-select-item';
+                label.innerHTML = `
+                    <input type="checkbox" name="selected_cards" value="${index}" checked>
+                    <span class="card-num-badge">${item.page}</span>
+                    <span>${item.title}</span>
+                `;
+                grid.appendChild(label);
+            });
+        };
+
+        function selectAllCards(status) {
+            const checkboxes = document.querySelectorAll('input[name="selected_cards"]');
+            checkboxes.forEach(cb => cb.checked = status);
+        }
+
         function startQuiz() {
+            // チェックされているカードのインデックスを取得
+            const checkedBoxes = document.querySelectorAll('input[name="selected_cards"]:checked');
+            if (checkedBoxes.length === 0) {
+                alert('出題するカードを1つ以上選択してください！');
+                return;
+            }
+
+            // 選択されたデータだけでクイズのキューを作成
+            queue = [];
+            checkedBoxes.forEach(cb => {
+                queue.push(data[parseInt(cb.value)]);
+            });
+
             const order = document.querySelector('input[name="order"]:checked').value;
-            queue = [...data];
             if (order === 'shuffle') queue.sort(() => Math.random() - 0.5);
+
             currentIndex = 0;
             appState = 'quiz';
             document.getElementById('setup-view').style.display = 'none';
@@ -188,7 +236,6 @@
             document.getElementById('current-index').innerText = `カード ${currentIndex + 1} / ${queue.length}`;
             document.getElementById('card-tag').innerText = item.title;
             
-            // 最初は穴埋め状態を表示
             let formattedText = item.text.replace(/（(\d+)）/g, '<span class="blank-box">$1</span>');
             document.getElementById('question-text').innerHTML = formattedText;
 
@@ -201,7 +248,7 @@
             const item = queue[currentIndex];
             const ansArray = item.answers.split('|');
             
-            // 本文内の（1）を（1. 正解）に置換する
+            // 本文内の（1）を（1. 正解）に置換
             let revealedText = item.text;
             ansArray.forEach((ans, idx) => {
                 const num = idx + 1;
@@ -210,7 +257,7 @@
             });
             document.getElementById('question-text').innerHTML = revealedText;
 
-            // 下部のリストも念のため表示（見やすさのため）
+            // 下部の一覧エリア
             const listContainer = document.getElementById('answer-list');
             listContainer.innerHTML = '';
             ansArray.forEach((ans, idx) => {
@@ -229,7 +276,7 @@
             if (currentIndex < queue.length) {
                 showCard();
             } else {
-                alert('終了しました！');
+                alert('選択されたすべてのカードが終了しました！');
                 resetApp();
             }
         }
