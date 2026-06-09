@@ -21,53 +21,37 @@
             color: var(--text-main);
             -webkit-text-size-adjust: 100%;
         }
-
         .container { padding: 40px 15px 60px; max-width: 500px; margin: 0 auto; }
         
+        /* 総合ポータルへ戻るボタン */
         .back-portal {
             display: inline-flex; align-items: center; padding: 6px 12px;
             background-color: var(--card-bg); border: 1px solid var(--border-color);
             border-radius: 20px; color: var(--text-main); text-decoration: none;
             font-size: 0.85rem; font-weight: bold; margin-bottom: 25px;
         }
-
         h1 { font-size: 1.8rem; font-weight: 800; margin: 0 0 5px 0; text-align: center; }
         .subtitle { font-size: 0.9rem; color: var(--text-dim); text-align: center; font-weight: 600; margin-bottom: 35px; }
-
         .menu-grid { display: flex; flex-direction: column; gap: 16px; }
-
         .menu-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 22px;
-            text-decoration: none;
-            color: var(--text-main);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-            transition: transform 0.1s, border-color 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 22px;
+            text-decoration: none; color: var(--text-main); box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            transition: transform 0.1s, border-color 0.2s; display: flex; align-items: center; justify-content: space-between;
         }
         .menu-card:active { transform: scale(0.98); }
-
         .card-left { display: flex; flex-direction: column; gap: 4px; }
         .card-title { font-size: 1.2rem; font-weight: 800; }
         .card-desc { font-size: 0.85rem; color: var(--text-dim); font-weight: 600; }
-
         .card-blank { border-left: 6px solid var(--accent-blue); }
         .card-blank .card-title { color: var(--accent-blue); }
-        
         .card-quiz { border-left: 6px solid var(--accent-orange); }
         .card-quiz .card-title { color: var(--accent-orange); }
-
         .arrow { font-size: 1.2rem; color: var(--text-dim); font-weight: bold; margin-left: 10px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- 総合ポータル（Meridian-Node）へ戻るリンク -->
         <a href="https://kaoman0079-ops.github.io/Meridian-Node/" class="back-portal">
             <span>⏎</span> <span>総合ポータルへ戻る</span>
         </a>
@@ -76,7 +60,6 @@
         <div class="subtitle">学習アプリメニュー</div>
 
         <div class="menu-grid">
-            <!-- ① 穴埋め暗記アプリへのリンク -->
             <a href="blank.html" class="menu-card card-blank">
                 <div class="card-left">
                     <span class="card-title">① 穴埋め暗記カード</span>
@@ -85,7 +68,6 @@
                 <span class="arrow">➔</span>
             </a>
 
-            <!-- ② 4択問題演習アプリへのリンク -->
             <a href="quiz4.html" class="menu-card card-quiz">
                 <div class="card-left">
                     <span class="card-title">② 4択問題演習マスター</span>
