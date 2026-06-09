@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>臨床医学各論 穴埋めカード</title>
+    <title>臨床医学各論 トレーニングポータル</title>
     <style>
         :root {
             --main-bg: #F8F9FA;
             --card-bg: #FFFFFF;
             --accent-blue: #3498DB;
             --accent-green: #2ECC71;
+            --accent-orange: #E67E22;
             --text-main: #2C3E50;
             --text-dim: #7F8C8D;
             --border-color: #E1E8ED;
@@ -22,288 +23,80 @@
             -webkit-text-size-adjust: 100%;
         }
 
-        .container { padding: 20px 15px 60px; max-width: 600px; margin: 0 auto; }
+        .container { padding: 40px 15px 60px; max-width: 500px; margin: 0 auto; text-align: center; }
         
         .back-portal {
             display: inline-flex; align-items: center; padding: 6px 12px;
             background-color: var(--card-bg); border: 1px solid var(--border-color);
             border-radius: 20px; color: var(--text-main); text-decoration: none;
-            font-size: 0.85rem; font-weight: bold; margin-bottom: 10px;
+            font-size: 0.85rem; font-weight: bold; margin-bottom: 20px;
         }
 
-        h1 { font-size: 1.6rem; font-weight: 800; margin: 10px 0 5px; text-align: center; }
-        .subtitle { font-size: 0.85rem; color: var(--text-dim); text-align: center; font-weight: 600; margin-bottom: 25px; }
+        h1 { font-size: 1.8rem; font-weight: 800; margin: 10px 0 5px; }
+        .subtitle { font-size: 0.9rem; color: var(--text-dim); font-weight: 600; margin-bottom: 40px; }
 
-        section { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 18px; margin-bottom: 15px; }
-        h3 { margin: 0 0 12px 0; font-size: 0.9rem; font-weight: 800; color: var(--text-main); }
+        .menu-grid { display: flex; flex-direction: column; gap: 20px; }
 
-        /* カード選択エリアのスタイル */
-        .select-controls { display: flex; gap: 10px; margin-bottom: 12px; }
-        .select-sub-btn { 
-            flex: 1; padding: 6px; font-size: 0.8rem; font-weight: bold; 
-            border: 1px solid var(--border-color); background: #FFF; border-radius: 6px; cursor: pointer; 
+        .menu-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 25px 20px;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            transition: transform 0.1s, box-shadow 0.1s;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
         }
-        .card-selector-grid {
-            display: grid; grid-template-columns: 1fr; gap: 6px; 
-            max-height: 250px; overflow-y: auto; padding-right: 5px;
-            border: 1px solid #E9ECEF; padding: 8px; border-radius: 8px; background: #FAFAFA;
-        }
-        .card-select-item {
-            display: flex; align-items: center; padding: 8px; background: #FFF;
-            border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.9rem; font-weight: 700; cursor: pointer;
-        }
-        .card-select-item input { margin-right: 10px; transform: scale(1.1); }
-        .card-num-badge { font-size: 0.75rem; color: var(--text-dim); margin-right: 8px; background: #E9ECEF; padding: 2px 6px; border-radius: 4px; min-width: 20px; text-align: center; }
+        .menu-card:active { transform: scale(0.98); box-shadow: 0 2px 6px rgba(0,0,0,0.01); }
 
-        .start-btn, .action-btn {
-            width: 100%; padding: 14px; font-size: 1rem; border-radius: 12px;
-            font-weight: 800; border: none; cursor: pointer; transition: transform 0.1s;
-            box-sizing: border-box; text-align: center;
+        .menu-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%;
         }
-        .start-btn { background-color: var(--accent-blue); color: #FFF; box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2); }
-        .action-btn { background-color: #E9ECEF; color: var(--text-main); margin-top: 10px; }
-        .start-btn:active { transform: scale(0.98); }
+        .mode-blank::before { background-color: var(--accent-blue); }
+        .mode-choice::before { background-color: var(--accent-orange); }
 
-        .quiz-view, .setup-view { display: none; }
-        .progress-bar { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-dim); font-weight: bold; margin-bottom: 10px; padding: 0 5px; }
-
-        .question-card {
-            background-color: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 24px; padding: 25px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 15px;
-        }
-
-        .card-tag { 
-            font-size: 1.3rem; font-weight: 800; color: var(--accent-blue); 
-            display: block; text-align: center; margin-bottom: 20px; padding-bottom: 10px;
-            border-bottom: 1px dashed var(--border-color);
-        }
-
-        .question-text { font-size: 1.15rem; font-weight: 700; line-height: 1.8; margin: 0; word-break: break-all; }
+        .menu-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .menu-desc { font-size: 0.85rem; color: var(--text-dim); font-weight: 600; line-height: 1.5; }
         
-        .blank-box {
-            display: inline-block; background-color: #EBF5FB; color: var(--accent-blue);
-            padding: 2px 8px; margin: 0 3px; border-radius: 6px; border-bottom: 2px solid var(--accent-blue);
-            font-weight: 800; min-width: 40px; text-align: center;
+        .badge {
+            font-size: 0.75rem; font-weight: 800; padding: 2px 8px; border-radius: 12px; color: #fff; margin-left: auto;
         }
-
-        .revealed-ans {
-            color: #E74C3C; background-color: #FDEDEC; border-bottom: 2px solid #E74C3C;
-            padding: 2px 5px; border-radius: 4px; font-weight: 800;
-        }
-
-        .answer-zone { background-color: #E8F8F5; border: 1px solid #A3E4D7; border-radius: 18px; padding: 18px; margin-top: 20px; display: none; }
-        .answer-title { font-weight: 800; font-size: 0.95rem; color: #117A65; margin-bottom: 10px; }
-        .answer-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.95rem; font-weight: 700; }
-
-        .flex-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .bg-blue { background-color: var(--accent-blue); }
+        .bg-orange { background-color: var(--accent-orange); }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <a href="https://kaoman0079-ops.github.io/Meridian-Node/" class="back-portal" id="back-button" onclick="handleBackClick(event)">
-            <span id="back-icon">⏎</span> <span id="back-text">🏠 Portal</span>
+        <a href="https://kaoman0079-ops.github.io/Meridian-Node/" class="back-portal">
+            <span>⏎</span> <span>🏠 Portal</span>
         </a>
 
         <h1>臨床医学各論</h1>
-        <div class="subtitle">重要キーワード 穴埋めトレーニング</div>
+        <div class="subtitle">国試対策演習メニュー</div>
 
-        <!-- 設定画面 -->
-        <div id="setup-view" class="setup-view" style="display: block;">
-            <section>
-                <h3>出題順序</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-                    <label style="background: #fff; border: 1px solid #ced4da; padding: 12px; text-align: center; border-radius: 12px; font-weight: bold; cursor: pointer;">
-                        <input type="radio" name="order" value="shuffle" checked style="margin-right: 5px;">ランダム
-                    </label>
-                    <label style="background: #fff; border: 1px solid #ced4da; padding: 12px; text-align: center; border-radius: 12px; font-weight: bold; cursor: pointer;">
-                        <input type="radio" name="order" value="normal" style="margin-right: 5px;">カード番号順
-                    </label>
+        <div class="menu-grid">
+            <a href="index2.html" class="menu-card mode-blank">
+                <div class="menu-title">
+                    <span>📝 穴埋めカードトレーニング</span>
+                    <span class="badge bg-blue">記述・暗記</span>
                 </div>
+                <div class="menu-desc">重要キーワードを脳内で補完しながら、基礎知識を確実に定着させるカードスタイルの演習です。</div>
+            </a>
 
-                <h3>出題するカードを選択</h3>
-                <div class="select-controls">
-                    <button type="button" class="select-sub-btn" onclick="selectAllCards(true)">すべて選択</button>
-                    <button type="button" class="select-sub-btn" onclick="selectAllCards(false)">すべて解除</button>
+            <a href="quiz4.html" class="menu-card mode-choice">
+                <div class="menu-title">
+                    <span>🔢 4択問題マスター</span>
+                    <span class="badge bg-orange">本試験形式</span>
                 </div>
-                <div class="card-selector-grid" id="card-selector-grid">
-                    <!-- JavaScriptで動的に生成 -->
-                </div>
-            </section>
-            <button class="start-btn" onclick="startQuiz()">選択したカードで演習開始 🚀</button>
-        </div>
-
-        <!-- クイズ画面 -->
-        <div id="quiz-view" class="quiz-view">
-            <div class="progress-bar">
-                <span id="current-index">第 1 問</span>
-            </div>
-
-            <div class="question-card">
-                <div class="card-tag" id="card-tag">疾患名</div>
-                <div class="question-text" id="question-text">問題文</div>
-            </div>
-
-            <button class="start-btn" id="reveal-btn" onclick="revealAnswers()" style="background-color: var(--accent-green);">答えを見る 👀</button>
-            
-            <div class="flex-group" id="next-action-group" style="display: none;">
-                <button class="action-btn" onclick="resetApp()" style="margin:0;">一覧へ戻る</button>
-                <button class="start-btn" onclick="nextQuestion()" style="margin:0;">次のカード ➔</button>
-            </div>
-
-            <div class="answer-zone" id="answer-zone">
-                <div class="answer-title">✅ 正解一覧</div>
-                <div class="answer-list" id="answer-list"></div>
-            </div>
+                <div class="menu-desc">実際の国家試験に近い4択形式で、実践的な判断力と消去法を網入れする問題演習です。</div>
+            </a>
         </div>
     </div>
 
-    <script>
-        const data = [
-          { page: 1, title: "かぜ症候群", text: "かぜ症候群とは、鼻腔、咽頭、喉頭などの上気道粘膜の（1）の総称で、80～90％が（2）感染に起因する。成人では（3）ウイルスが、小児では（4）ウイルスによるものが多い。", answers: "急性カタル性炎症|ウイルス|ライノ|RS" },
-          { page: 2, title: "インフルエンザ", text: "インフルエンザとは、（1）ウイルスの感染症で３型に分類される。このうち人の間で流行するのは、（2）型と（3）型である。典型的症状は、突然38度以上の高熱、頭痛、関節痛、筋肉痛、全身倦怠感などの（4）症状が、続いて（5）症状がみられる。", answers: "インフルエンザ|A|B|全身|上気道" },
-          { page: 3, title: "急性気管支炎", text: "急性気管支炎は、上気道のかぜ症候群が気管支に波及して発症したものである。気管支粘膜の炎症により（1）や（2）などの下気道症状や（3）をきたす。細菌性２次的感染を合併すると、（4）が認められる。胸部X線で肺に（5）は認められない。", answers: "咳嗽|痰|発熱|膿性痰|異常陰影" },
-          { page: 4, title: "肺炎", text: "肺炎とは、（1）に生じた炎症性疾患である。初期は、咳嗽、喀痰、発熱等の（2）様症状を呈し、進行により（3）、呼吸困難などをきたす。細菌性肺炎の場合、（4）痰となる。（5）肺炎が、次いで（6）肺炎が多い。", answers: "肺胞や肺間質|感冒|胸痛|膿性|肺炎球菌|マイコプラズマ" },
-          { page: 5, title: "肺結核", text: "肺結核は、（1）による呼吸器感染症で、飛沫核の（2）感染の様式をとる。全身症状には、持続する（3）、盗汗、全身倦怠感、体重減少などを、呼吸器症状では、（4）、（5）、血痰などを2週間以上呈する。肺結核では、胸部X線で肺野に浸潤影（6）や、（7）を認める。血液検査は（8）法、喀痰検査は（9）染色法で、遺伝子学的検査ではPCR法により結核菌を同定。", answers: "結核菌|空気|微熱|咳嗽|喀痰|乾酪性肉芽腫|空洞化|クウォンティフェロン|チール・ネールゼン" },
-          { page: 6, title: "慢性閉塞性肺疾患（COPD）", text: "COPDの危険因子は（1）で、気道・肺胞に（2）が生じ、（3）を有する疾患の総称。慢性的な（4）や（5）、（6）を認め、肺機能検査では、気道抵抗増加による（7）の延長や、（8）が（9）%未満と低下する。COPDは（10）が原因となる気道病変優位型と、（11）が原因となる気腫優位型に分類される。", answers: "喫煙|慢性炎症|気流制限|咳嗽|痰|労作時呼吸困難|呼気|1秒率|70|慢性気管支炎|肺気腫" },
-          { page: 7, title: "肺気腫", text: "肺気腫では、末梢気道が虚脱による閉塞で、気流制限が生じる。その為、十分な呼出をするために（1）呼吸となる。また、（2）の増加により、（3）状胸郭となる。進行により低酸素血症から肺高血圧となり（4）となる。胸部X線では、肺野の過膨張所見として、（5）、や（6）がみられ、肺野での空気貯留により（7）が亢進する。", answers: "口すぼめ|残気量|ビア樽|右心不全|横隔膜平旦化|滴状心|透過性" },
-          { page: 8, title: "慢性気管支炎", text: "慢性気管支炎は、1年間に（1）カ月以上続く（2）や（3）が、（4）年以上続いている状態と定義される。呼吸リハビリテーションとしては、去痰をうながす（5）が行われる。", answers: "3|咳嗽|喀痰|2|体位排痰法" },
-          { page: 9, title: "気管支喘息", text: "気管支喘息は（1）、Ｔ細胞を主体とした気道の（2）性疾患。気道の（3）性亢進という特徴をもち、反復性の（4）性の気流制限を起こす。この気流制限を（5）といい、（6）を伴う（7）をきたす。", answers: "好酸球|慢性炎症|過敏|可逆|喘息発作|喘鳴|呼気性呼吸困難" },
-          { page: 10, title: "特発性肺線維症", text: "特発性肺線維症、50歳以上（1）喫煙者に多く原因不明。喀痰を伴わない（2）、発熱、徐々に増悪する（3）、（4）がみられる。（5）を聴取し、胸部CTで肺底部（6）を認め（7）換気障害をきたす。", answers: "男性|乾性咳嗽|労作時呼吸困難|ばち指|捻髪音|蜂巣肺|拘束性" },
-          { page: 11, title: "原発性自然気胸", text: "原発性自然気胸（1）歳前後の（2）、（3）型の（4）性に多い。突然出現する病側の（5）と（6）、呼吸困難、動悸、不安感などを自覚する。", answers: "20|長身|やせ|男性|胸痛|空咳" },
-          { page: 12, title: "肺癌", text: "原発性肺癌は、気管支から肺胞までの（1）を発生母地とし、癌組織の特徴により（2）癌、（3）癌に大別され、後者には、（4）癌、（5）癌、（6）癌がある。このうち最も悪性度が高いのが（7）癌である。", answers: "上皮細胞|小細胞|非小細胞|扁平上皮|腺|大細胞|小細胞" },
-          { page: 13, title: "クッシング症候群・クッシング病", text: "クッシング症候群とは、慢性の（1）の過剰症である。このうち、下垂体腺腫からの（2）過剰分泌によるものを（3）という。症状には、（4）顔貌、（5）肥満、赤色皮膚線条、高血圧、月経異常や、下垂体腺腫による（6）半盲などがある。", answers: "コルチゾール|ACTH|クッシング病|満月様|中心性|両耳側" },
-          { page: 14, title: "先端巨大症、巨人症", text: "下垂体前葉から分泌される（1）の分泌過剰症である。発症時期が骨端線の閉鎖前では、（2）、閉鎖後では（3）となる。", answers: "成長ホルモン|巨人症|先端巨大症" },
-          { page: 15, title: "尿崩症", text: "下垂体（1）から分泌される（2）の分泌障害による疾患。（3）、（4）が主症状となり、口渇や口内灼熱感などを自覚する。1日の尿量が（5）㍑以上となり、尿は低張尿となる。", answers: "後葉|抗利尿ホルモン|多飲|多尿|3" },
-          { page: 16, title: "バセドウ病", text: "（1）異常により甲状腺機能亢進をきたした疾患で、びまん性甲状腺腫を伴う。20～40歳代の（2）に多い。主な症状として、（3）の三徴候として、（4）、（5）、（6）を呈する。", answers: "自己免疫|女性|メルゼブルグ|びまん性甲状腺腫|眼球突出|頻脈" },
-          { page: 17, title: "甲状腺機能低下症", text: "甲状腺機能低下症には、先天性の（1）、成人に発症する後天性の（2）、自己免疫が原因となる（3）がある。症状として、（4）、（5）、不活発、寒がりなどがみられる。", answers: "クレチン病|粘液水腫|橋本病|全身倦怠|易疲労性" },
-          { page: 18, title: "原発性アルドステロン症", text: "副腎皮質からアルドステロンが過剰に分泌される疾患で、別名（1）症候群とよばれ、症候性（2）症をきたす疾患の１つである。アルドステロンは、（3）再吸収と（4）排泄促進作用をもつ。", answers: "コン|高血圧|Na|K" },
-          { page: 19, title: "アジソン病", text: "慢性（1）機能低下により副腎皮質ホルモン（2、3、副腎アンドロゲン）分泌低下をきたす疾患。二次的に（4）高値を呈する。症候性（5）症原因疾患の１つである。", answers: "副腎皮質|コルチゾール|アルドステロン|ACTH|低血圧" },
-          { page: 20, title: "褐色細胞腫", text: "クロム親和性細胞から発生する腫瘍で、（1）を過剰に産生・分泌する。５H症状として、（2）、（3）、（4）、（5）、（6）がある。", answers: "カテコールアミン|高血圧|高血糖|代謝亢進|頭痛|多汗" }
-        ];
-
-        let queue = [];
-        let currentIndex = 0;
-        let appState = 'setup';
-
-        // 画面立ち上げ時に選択用リストを生成
-        window.onload = function() {
-            const grid = document.getElementById('card-selector-grid');
-            data.forEach((item, index) => {
-                const label = document.createElement('label');
-                label.className = 'card-select-item';
-                label.innerHTML = `
-                    <input type="checkbox" name="selected_cards" value="${index}" checked>
-                    <span class="card-num-badge">${item.page}</span>
-                    <span>${item.title}</span>
-                `;
-                grid.appendChild(label);
-            });
-        };
-
-        function selectAllCards(status) {
-            const checkboxes = document.querySelectorAll('input[name="selected_cards"]');
-            checkboxes.forEach(cb => cb.checked = status);
-        }
-
-        function startQuiz() {
-            // チェックされているカードのインデックスを取得
-            const checkedBoxes = document.querySelectorAll('input[name="selected_cards"]:checked');
-            if (checkedBoxes.length === 0) {
-                alert('出題するカードを1つ以上選択してください！');
-                return;
-            }
-
-            // 選択されたデータだけでクイズのキューを作成
-            queue = [];
-            checkedBoxes.forEach(cb => {
-                queue.push(data[parseInt(cb.value)]);
-            });
-
-            const order = document.querySelector('input[name="order"]:checked').value;
-            if (order === 'shuffle') queue.sort(() => Math.random() - 0.5);
-
-            currentIndex = 0;
-            appState = 'quiz';
-            document.getElementById('setup-view').style.display = 'none';
-            document.getElementById('quiz-view').style.display = 'block';
-            updateBackButton();
-            showCard();
-        }
-
-        function showCard() {
-            const item = queue[currentIndex];
-            document.getElementById('current-index').innerText = `カード ${currentIndex + 1} / ${queue.length}`;
-            document.getElementById('card-tag').innerText = item.title;
-            
-            let formattedText = item.text.replace(/（(\d+)）/g, '<span class="blank-box">$1</span>');
-            document.getElementById('question-text').innerHTML = formattedText;
-
-            document.getElementById('answer-zone').style.display = 'none';
-            document.getElementById('reveal-btn').style.display = 'block';
-            document.getElementById('next-action-group').style.display = 'none';
-        }
-
-        function revealAnswers() {
-            const item = queue[currentIndex];
-            const ansArray = item.answers.split('|');
-            
-            // 本文内の（1）を（1. 正解）に置換
-            let revealedText = item.text;
-            ansArray.forEach((ans, idx) => {
-                const num = idx + 1;
-                const pattern = new RegExp(`（${num}）`, 'g');
-                revealedText = revealedText.replace(pattern, `<span class="revealed-ans">${num}. ${ans}</span>`);
-            });
-            document.getElementById('question-text').innerHTML = revealedText;
-
-            // 下部の一覧エリア
-            const listContainer = document.getElementById('answer-list');
-            listContainer.innerHTML = '';
-            ansArray.forEach((ans, idx) => {
-                const div = document.createElement('div');
-                div.innerHTML = `<span style="color:var(--accent-green)">(${idx+1})</span> ${ans}`;
-                listContainer.appendChild(div);
-            });
-
-            document.getElementById('answer-zone').style.display = 'block';
-            document.getElementById('reveal-btn').style.display = 'none';
-            document.getElementById('next-action-group').style.display = 'flex';
-        }
-
-        function nextQuestion() {
-            currentIndex++;
-            if (currentIndex < queue.length) {
-                showCard();
-            } else {
-                alert('選択されたすべてのカードが終了しました！');
-                resetApp();
-            }
-        }
-
-        function resetApp() {
-            appState = 'setup';
-            updateBackButton();
-            document.getElementById('quiz-view').style.display = 'none';
-            document.getElementById('setup-view').style.display = 'block';
-        }
-
-        function handleBackClick(event) {
-            if (appState === 'quiz') {
-                event.preventDefault();
-                if (confirm("中断して戻りますか？")) resetApp();
-            }
-        }
-
-        function updateBackButton() {
-            const iconEl = document.getElementById("back-icon");
-            const textEl = document.getElementById("back-text");
-            if (appState === 'quiz') {
-                iconEl.innerText = "↩"; textEl.innerText = "中断して戻る";
-            } else {
-                iconEl.innerText = "⏎"; textEl.innerText = "🏠 Portal";
-            }
-        }
-    </script>
 </body>
 </html>
