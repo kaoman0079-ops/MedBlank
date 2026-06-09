@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>病理学・臨床医学 穴埋めカード</title>
+    <title>臨床医学各論 穴埋めカード</title>
     <style>
         :root {
             --main-bg: #F8F9FA;
@@ -22,36 +22,19 @@
             -webkit-text-size-adjust: 100%;
         }
 
-        /* 戻るボタン */
-        .back-portal {
-            display: inline-flex;
-            align-items: center;
-            padding: 6px 12px;
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            color: var(--text-main);
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: bold;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-            margin-bottom: 10px;
-            cursor: pointer;
-        }
-        .back-portal span { margin-right: 5px; }
-
         .container { padding: 20px 15px 60px; max-width: 600px; margin: 0 auto; }
+        
+        .back-portal {
+            display: inline-flex; align-items: center; padding: 6px 12px;
+            background-color: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 20px; color: var(--text-main); text-decoration: none;
+            font-size: 0.85rem; font-weight: bold; margin-bottom: 10px;
+        }
+
         h1 { font-size: 1.6rem; font-weight: 800; margin: 10px 0 5px; text-align: center; }
         .subtitle { font-size: 0.85rem; color: var(--text-dim); text-align: center; font-weight: 600; margin-bottom: 25px; }
 
-        /* 設定セクション */
-        section {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 18px;
-            margin-bottom: 15px;
-        }
+        section { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 18px; margin-bottom: 15px; }
         h3 { margin: 0 0 12px 0; font-size: 0.9rem; font-weight: 800; color: var(--text-main); }
 
         .start-btn, .action-btn {
@@ -61,39 +44,52 @@
         }
         .start-btn { background-color: var(--accent-blue); color: #FFF; box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2); }
         .action-btn { background-color: #E9ECEF; color: var(--text-main); margin-top: 10px; }
-        .start-btn:active, .action-btn:active { transform: scale(0.98); }
+        .start-btn:active { transform: scale(0.98); }
 
-        /* クイズ画面 */
         .quiz-view, .setup-view { display: none; }
         .progress-bar { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-dim); font-weight: bold; margin-bottom: 10px; padding: 0 5px; }
 
         .question-card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 24px;
-            padding: 25px 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-            margin-bottom: 15px;
+            background-color: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 24px; padding: 25px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 15px;
         }
-        .card-tag { font-size: 0.75rem; font-weight: 800; color: var(--text-dim); background-color: #E9ECEF; padding: 3px 10px; border-radius: 20px; display: inline-block; margin-bottom: 15px; }
-        .question-text { font-size: 1.15rem; font-weight: 700; line-height: 1.6; margin: 0; word-break: break-all; }
+
+        /* 疾患名のスタイル修正：中央寄せ・大きめの文字 */
+        .card-tag { 
+            font-size: 1.3rem; 
+            font-weight: 800; 
+            color: var(--accent-blue); 
+            display: block; 
+            text-align: center; 
+            margin-bottom: 20px; 
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .question-text { font-size: 1.15rem; font-weight: 700; line-height: 1.8; margin: 0; word-break: break-all; }
         
-        /* 穴埋め用のダッシュ表記 */
         .blank-box {
             display: inline-block; background-color: #EBF5FB; color: var(--accent-blue);
             padding: 2px 8px; margin: 0 3px; border-radius: 6px; border-bottom: 2px solid var(--accent-blue);
             font-weight: 800; min-width: 40px; text-align: center;
         }
 
-        /* 解答エリア */
+        /* 答えが出た時のスタイル */
+        .revealed-ans {
+            color: #E74C3C;
+            background-color: #FDEDEC;
+            border-bottom: 2px solid #E74C3C;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-weight: 800;
+        }
+
         .answer-zone {
             background-color: #E8F8F5; border: 1px solid #A3E4D7; border-radius: 18px;
             padding: 18px; margin-top: 20px; display: none;
         }
         .answer-title { font-weight: 800; font-size: 0.95rem; color: #117A65; margin-bottom: 10px; }
-        .answer-list { display: flex; flex-direction: column; gap: 8px; font-size: 1rem; font-weight: 700; }
-        .ans-item { display: flex; align-items: baseline; }
-        .ans-num { color: var(--accent-green); margin-right: 8px; font-weight: 800; }
+        .answer-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.95rem; font-weight: 700; }
 
         .flex-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
     </style>
@@ -105,7 +101,7 @@
             <span id="back-icon">⏎</span> <span id="back-text">🏠 Portal</span>
         </a>
 
-        <h1>病理学・臨床医学</h1>
+        <h1>臨床医学各論</h1>
         <div class="subtitle">重要キーワード 穴埋めトレーニング</div>
 
         <div id="setup-view" class="setup-view" style="display: block;">
@@ -131,11 +127,6 @@
             <div class="question-card">
                 <div class="card-tag" id="card-tag">疾患名</div>
                 <div class="question-text" id="question-text">問題文</div>
-                
-                <div class="answer-zone" id="answer-zone">
-                    <div class="answer-title">✅ 正解キーワード</div>
-                    <div class="answer-list" id="answer-list"></div>
-                </div>
             </div>
 
             <button class="start-btn" id="reveal-btn" onclick="revealAnswers()" style="background-color: var(--accent-green);">答えを見る 👀</button>
@@ -144,11 +135,15 @@
                 <button class="action-btn" onclick="resetApp()" style="margin:0;">一覧へ戻る</button>
                 <button class="start-btn" onclick="nextQuestion()" style="margin:0;">次のカード ➔</button>
             </div>
+
+            <div class="answer-zone" id="answer-zone" style="margin-top:20px;">
+                <div class="answer-title">✅ 正解一覧</div>
+                <div class="answer-list" id="answer-list"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        // ご提示いただいたデータをそのまま格納
         const data = [
           { page: 1, title: "かぜ症候群", text: "かぜ症候群とは、鼻腔、咽頭、喉頭などの上気道粘膜の（1）の総称で、80～90％が（2）感染に起因する。成人では（3）ウイルスが、小児では（4）ウイルスによるものが多い。", answers: "急性カタル性炎症|ウイルス|ライノ|RS" },
           { page: 2, title: "インフルエンザ", text: "インフルエンザとは、（1）ウイルスの感染症で３型に分類される。このうち人の間で流行するのは、（2）型と（3）型である。典型的症状は、突然38度以上の高熱、頭痛、関節痛、筋肉痛、全身倦怠感などの（4）症状が、続いて（5）症状がみられる。", answers: "インフルエンザ|A|B|全身|上気道" },
@@ -179,9 +174,7 @@
         function startQuiz() {
             const order = document.querySelector('input[name="order"]:checked').value;
             queue = [...data];
-            if (order === 'shuffle') {
-                queue.sort(() => Math.random() - 0.5);
-            }
+            if (order === 'shuffle') queue.sort(() => Math.random() - 0.5);
             currentIndex = 0;
             appState = 'quiz';
             document.getElementById('setup-view').style.display = 'none';
@@ -194,12 +187,11 @@
             const item = queue[currentIndex];
             document.getElementById('current-index').innerText = `カード ${currentIndex + 1} / ${queue.length}`;
             document.getElementById('card-tag').innerText = item.title;
-
-            // （1）などを綺麗に見せる置換
-            let formattedText = item.text.replace(/（(\d+)）/g, '<span class="blank-box"> $1 </span>');
+            
+            // 最初は穴埋め状態を表示
+            let formattedText = item.text.replace(/（(\d+)）/g, '<span class="blank-box">$1</span>');
             document.getElementById('question-text').innerHTML = formattedText;
 
-            // 解答エリアを隠す
             document.getElementById('answer-zone').style.display = 'none';
             document.getElementById('reveal-btn').style.display = 'block';
             document.getElementById('next-action-group').style.display = 'none';
@@ -208,14 +200,23 @@
         function revealAnswers() {
             const item = queue[currentIndex];
             const ansArray = item.answers.split('|');
-            const container = document.getElementById('answer-list');
-            container.innerHTML = '';
+            
+            // 本文内の（1）を（1. 正解）に置換する
+            let revealedText = item.text;
+            ansArray.forEach((ans, idx) => {
+                const num = idx + 1;
+                const pattern = new RegExp(`（${num}）`, 'g');
+                revealedText = revealedText.replace(pattern, `<span class="revealed-ans">${num}. ${ans}</span>`);
+            });
+            document.getElementById('question-text').innerHTML = revealedText;
 
+            // 下部のリストも念のため表示（見やすさのため）
+            const listContainer = document.getElementById('answer-list');
+            listContainer.innerHTML = '';
             ansArray.forEach((ans, idx) => {
                 const div = document.createElement('div');
-                div.className = 'ans-item';
-                div.innerHTML = `<span class="ans-num">(${idx + 1})</span> <span>${ans}</span>`;
-                container.appendChild(div);
+                div.innerHTML = `<span style="color:var(--accent-green)">(${idx+1})</span> ${ans}`;
+                listContainer.appendChild(div);
             });
 
             document.getElementById('answer-zone').style.display = 'block';
@@ -228,7 +229,7 @@
             if (currentIndex < queue.length) {
                 showCard();
             } else {
-                alert('すべてのカードが終了しました！');
+                alert('終了しました！');
                 resetApp();
             }
         }
@@ -243,9 +244,7 @@
         function handleBackClick(event) {
             if (appState === 'quiz') {
                 event.preventDefault();
-                if (confirm("演習を中断して最初の画面に戻りますか？")) {
-                    resetApp();
-                }
+                if (confirm("中断して戻りますか？")) resetApp();
             }
         }
 
