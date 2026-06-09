@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>臨床医学各論 トレーニングポータル</title>
+    <title>国試対策ポータル</title>
     <style>
         :root {
             --main-bg: #F8F9FA;
             --card-bg: #FFFFFF;
             --accent-blue: #3498DB;
-            --accent-green: #2ECC71;
             --accent-orange: #E67E22;
             --text-main: #2C3E50;
             --text-dim: #7F8C8D;
@@ -23,77 +22,63 @@
             -webkit-text-size-adjust: 100%;
         }
 
-        .container { padding: 40px 15px 60px; max-width: 500px; margin: 0 auto; text-align: center; }
+        .container { padding: 40px 15px 60px; max-width: 500px; margin: 0 auto; }
         
-        .back-portal {
-            display: inline-flex; align-items: center; padding: 6px 12px;
-            background-color: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 20px; color: var(--text-main); text-decoration: none;
-            font-size: 0.85rem; font-weight: bold; margin-bottom: 20px;
-        }
+        h1 { font-size: 1.8rem; font-weight: 800; margin: 0 0 5px 0; text-align: center; }
+        .subtitle { font-size: 0.9rem; color: var(--text-dim); text-align: center; font-weight: 600; margin-bottom: 35px; }
 
-        h1 { font-size: 1.8rem; font-weight: 800; margin: 10px 0 5px; }
-        .subtitle { font-size: 0.9rem; color: var(--text-dim); font-weight: 600; margin-bottom: 40px; }
-
-        .menu-grid { display: flex; flex-direction: column; gap: 20px; }
+        .menu-grid { display: flex; flex-direction: column; gap: 16px; }
 
         .menu-card {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 20px;
-            padding: 25px 20px;
+            padding: 22px;
             text-decoration: none;
-            color: inherit;
-            display: block;
+            color: var(--text-main);
             box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-            transition: transform 0.1s, box-shadow 0.1s;
-            text-align: left;
-            position: relative;
-            overflow: hidden;
+            transition: transform 0.1s, border-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-        .menu-card:active { transform: scale(0.98); box-shadow: 0 2px 6px rgba(0,0,0,0.01); }
+        .menu-card:active { transform: scale(0.98); }
 
-        .menu-card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%;
-        }
-        .mode-blank::before { background-color: var(--accent-blue); }
-        .mode-choice::before { background-color: var(--accent-orange); }
+        .card-left { display: flex; flex-direction: column; gap: 4px; }
+        .card-title { font-size: 1.2rem; font-weight: 800; }
+        .card-desc { font-size: 0.85rem; color: var(--text-dim); font-weight: 600; }
 
-        .menu-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-        .menu-desc { font-size: 0.85rem; color: var(--text-dim); font-weight: 600; line-height: 1.5; }
+        /* アプリごとのテーマカラー */
+        .card-blank { border-left: 6px solid var(--accent-blue); }
+        .card-blank .card-title { color: var(--accent-blue); }
         
-        .badge {
-            font-size: 0.75rem; font-weight: 800; padding: 2px 8px; border-radius: 12px; color: #fff; margin-left: auto;
-        }
-        .bg-blue { background-color: var(--accent-blue); }
-        .bg-orange { background-color: var(--accent-orange); }
+        .card-quiz { border-left: 6px solid var(--accent-orange); }
+        .card-quiz .card-title { color: var(--accent-orange); }
+
+        .arrow { font-size: 1.2rem; color: var(--text-dim); font-weight: bold; margin-left: 10px; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <a href="https://kaoman0079-ops.github.io/Meridian-Node/" class="back-portal">
-            <span>⏎</span> <span>🏠 Portal</span>
-        </a>
-
-        <h1>臨床医学各論</h1>
-        <div class="subtitle">国試対策演習メニュー</div>
+        <h1>国試突破ポータル</h1>
+        <div class="subtitle">臨床医学各論 アプリメニュー</div>
 
         <div class="menu-grid">
-            <a href="index2.html" class="menu-card mode-blank">
-                <div class="menu-title">
-                    <span>📝 穴埋めカードトレーニング</span>
-                    <span class="badge bg-blue">記述・暗記</span>
+            <a href="blank.html" class="menu-card card-blank">
+                <div class="card-left">
+                    <span class="card-title">① 穴埋め暗記カード</span>
+                    <span class="card-desc">重要ワードを隠して隠して徹底記憶</span>
                 </div>
-                <div class="menu-desc">重要キーワードを脳内で補完しながら、基礎知識を確実に定着させるカードスタイルの演習です。</div>
+                <span class="arrow">➔</span>
             </a>
 
-            <a href="quiz4.html" class="menu-card mode-choice">
-                <div class="menu-title">
-                    <span>🔢 4択問題マスター</span>
-                    <span class="badge bg-orange">本試験形式</span>
+            <a href="quiz4.html" class="menu-card card-quiz">
+                <div class="card-left">
+                    <span class="card-title">② 4択問題演習マスター</span>
+                    <span class="card-desc">CSVデータを読み込んで実戦テスト</span>
                 </div>
-                <div class="menu-desc">実際の国家試験に近い4択形式で、実践的な判断力と消去法を網入れする問題演習です。</div>
+                <span class="arrow">➔</span>
             </a>
         </div>
     </div>
