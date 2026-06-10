@@ -62,7 +62,7 @@
         <div class="subtitle">穴埋め暗記カード</div>
 
         <div id="loading-view" class="loading-view" style="display: block;">
-            <div class="status-msg" id="loading-msg">⏳ CSV問題データを読み込んでいます...</div>
+            <div class="status-msg" id="loading-msg">⏳ CSV問題データ(data2.csv)を読み込んでいます...</div>
         </div>
 
         <div id="setup-view" class="setup-view">
@@ -105,22 +105,14 @@
         let rawData = []; let cardQueue = []; let currentIndex = 0; let appState = 'loading';
         
         window.onload = function() {
-            // まず新データの「data2.csv」を読みに行く
+            // 他のファイルに浮気せず、data2.csv のみをターゲットにする
             fetch('data2.csv')
                 .then(res => {
-                    if (!res.ok) {
-                        // もし data2.csv がまだGitHubにない場合は、自動で従来の data.csv に切り替える
-                        console.log('data2.csv が見つからないため data.csv を読み込みます');
-                        return fetch('data.csv');
-                    }
-                    return res;
-                })
-                .then(res => {
-                    if (!res.ok) throw new Error('CSV問題ファイルが一切見つかりません。');
+                    if (!res.ok) throw new Error('data2.csv が見つかりません。ファイルが正しく配置されているか確認してください。');
                     return res.arrayBuffer();
                 })
                 .then(buffer => {
-                    // Shift-JIS と UTF-8 の両方に対応する安全なデコード処理
+                    // Shift-JIS と UTF-8 の両対応デコード（フリーズバグ修正）
                     let text = "";
                     try {
                         let utf8Decoder = new TextDecoder('utf-8', {fatal: true});
@@ -133,7 +125,7 @@
                     parseCSV(text);
                     
                     if(rawData.length === 0) {
-                        document.getElementById('loading-msg').innerHTML = '⚠️ 有効なCSVデータを取り込めませんでした。<br>ファイルの列並び（カテゴリ、疾患名、問題、正解）を確認してください。';
+                        document.getElementById('loading-msg').innerHTML = '⚠️ data2.csv から有効な穴埋めデータを取り込めませんでした。<br>ファイルの列並び（カテゴリ、疾患名、問題文、正解）を確認してください。';
                     } else {
                         appState = 'setup'; 
                         generateCategoryOptions();
@@ -142,11 +134,11 @@
                     }
                 })
                 .catch(err => {
-                    document.getElementById('loading-msg').innerHTML = '⚠️ エラーが発生しました:<br>' + err.message;
+                    document.getElementById('loading-msg').innerHTML = '⚠️ 読み込みエラー:<br>' + err.message;
                 });
         };
 
-        // CSVを安全に配列化する関数
+        // セル内改行やクォーテーションに対応した安全なCSV分割
         function parseCSV(text) {
             let lines = []; let row = [""]; let inQuotes = false;
             for (let i = 0; i < text.length; i++) {
@@ -165,6 +157,7 @@
             }
             if (row.length > 1 || row[0] !== "") lines.push(row);
 
+            // 1行目はヘッダーとしてスキップ
             for (let i = 1; i < lines.length; i++) {
                 const columns = lines[i];
                 if (columns.length < 4 || !columns[1]) continue;
@@ -218,12 +211,12 @@
             const item = cardQueue[currentIndex];
             document.getElementById('current-index').innerText = `カード ${currentIndex + 1} / ${cardQueue.length}`;
             document.getElementById('card-tag').innerText = item.tag;
-            document.getElementById('disease-name').innerText = item.disease; // 疾患名を中央に大きく表示
+            document.getElementById('disease-name').innerText = item.disease; // 病名を中央寄せ・大文字表示
             
             let displayHtml = item.question;
             const numRegex = /([（\(][１２３４５６７８９０\d][）\)])/g;
             
-            // （１）や（２）の穴埋め置換ロジック
+            // 問題文の中の (1) や （２）を、答えとインライン合体させて隠すロジック
             if (numRegex.test(displayHtml) && item.answer) {
                 const answerParts = item.answer.split(/[,、\/／\s\n]+/).map(p => p.trim()).filter(Boolean);
                 let partIndex = 0;
