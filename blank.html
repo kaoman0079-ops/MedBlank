@@ -33,9 +33,13 @@
         .progress-bar { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-dim); font-weight: bold; margin-bottom: 10px; padding: 0 5px; }
         .flashcard { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 24px; padding: 30px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 15px; min-height: 200px; display: flex; flex-direction: column; justify-content: center; }
         .card-tag { font-size: 1.1rem; font-weight: 800; color: var(--accent-blue); display: block; text-align: center; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px dashed var(--border-color); }
-        .card-text { font-size: 1.2rem; font-weight: 700; line-height: 1.8; margin: 0 0 20px 0; word-break: break-all; text-align: left; }
+        
+        /* 穴埋め画面専用のテキストスタイル */
+        .card-q-text { font-size: 1rem; color: var(--text-dim); margin-bottom: 15px; font-weight: 600; border-left: 3px solid #BDC3C7; padding-left: 10px; }
+        .card-text { font-size: 1.25rem; font-weight: 700; line-height: 1.8; margin: 0 0 20px 0; word-break: break-all; text-align: left; color: var(--text-main); }
+        
         .explanation-box { background-color: #F8F9FA; border-left: 4px solid var(--accent-blue); padding: 12px 15px; font-size: 0.95rem; border-radius: 0 8px 8px 0; color: #566573; line-height: 1.5; font-weight: 600; display: none; }
-        .blank-word { background-color: #2C3E50; color: #2C3E50; padding: 2px 6px; margin: 0 3px; border-radius: 6px; cursor: pointer; font-weight: 800; transition: all 0.2s; border-bottom: 2px solid #1a252f; display: inline-block; line-height: 1.2; }
+        .blank-word { background-color: #2C3E50; color: #2C3E50; padding: 2px 8px; margin: 0 3px; border-radius: 6px; cursor: pointer; font-weight: 800; transition: all 0.2s; border-bottom: 2px solid #1a252f; display: inline-block; line-height: 1.2; }
         .blank-word.revealed { background-color: #FFF2CC; color: #D68910; border-bottom: 2px solid #F9E79F; }
         .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
         .action-btn { padding: 14px; font-size: 0.95rem; font-weight: 800; border-radius: 12px; border: 1px solid var(--border-color); cursor: pointer; background-color: #FFF; color: var(--text-main); transition: transform 0.1s; }
@@ -55,7 +59,7 @@
         <div class="subtitle">穴埋め暗記カード</div>
 
         <div id="loading-view" class="loading-view" style="display: block;">
-            <div class="status-msg" id="loading-msg">⏳ CSV問題データ(data2.csv)を読み込んでいます...</div>
+            <div class="status-msg" id="loading-msg">⏳ CSV問題データを読み込んでいます...</div>
         </div>
 
         <div id="setup-view" class="setup-view">
@@ -83,7 +87,8 @@
             </div>
             <div class="flashcard">
                 <div class="card-tag" id="card-tag">カテゴリ</div>
-                <div class="card-text" id="card-text">問題文</div>
+                <div class="card-q-text" id="card-q-text">〜はどれか？</div>
+                <div class="card-text" id="card-text">ここに穴埋め文章が入ります</div>
                 <div class="explanation-box" id="explanation-box">解説文</div>
             </div>
             <div class="control-grid">
@@ -97,16 +102,15 @@
         let rawData = []; let cardQueue = []; let currentIndex = 0; let appState = 'loading';
         
         window.onload = function() {
-            // 新しい data2.csv を読み込むように指定
             fetch('data2.csv')
                 .then(res => { 
-                    if (!res.ok) throw new Error('data2.csv の読み込みに失敗しました。ファイル名が正しいかご確認ください。'); 
+                    if (!res.ok) throw new Error('data2.csv の読み込みに失敗しました。'); 
                     return res.text(); 
                 })
                 .then(text => {
                     parseCSV(text);
                     if(rawData.length === 0) {
-                        document.getElementById('loading-msg').innerHTML = '⚠️ data2.csv から有効なデータが見つかりませんでした。';
+                        document.getElementById('loading-msg').innerHTML = '⚠️ 有効なデータが見つかりませんでした。';
                     } else {
                         appState = 'setup'; 
                         generateCategoryOptions();
@@ -130,11 +134,10 @@
                     const category = clean(row[1]); 
                     const subcategory = clean(row[2]); 
                     const question = clean(row[3]);
-                    // 4択用CSVの構造をベースに正解・解説位置を取得（列が少なければ柔軟に対応）
                     const answer = row[5] ? clean(row[5]) : (row[4] ? clean(row[4]) : '');
                     const explanation = row[6] ? clean(row[6]) : '';
                     
-                    if (question) { 
+                    if (question && answer) { 
                         rawData.push({ 
                             mainCategory: category, 
                             tag: `${category} (${subcategory})`, 
@@ -181,25 +184,54 @@
             document.getElementById('current-index').innerText = `カード ${currentIndex + 1} / ${cardQueue.length}`;
             document.getElementById('card-tag').innerText = item.tag;
             
-            let displayHtml = item.question;
+            // 1. 上部には「質問（〜はどれか？）」をサブ的に表示
+            document.getElementById('card-q-text').innerText = `❓ 問い: ${item.question}`;
             
-            // パターン1: data2.csvの問題文に元から【キーワード】が含まれている場合
-            if (displayHtml.includes('【') && displayHtml.includes('】')) {
-                displayHtml = displayHtml.replace(/【(.*?)】/g, '<span class="blank-word" onclick="toggleBlank(this)">$1</span>');
-            } 
-            // パターン2: 問題文の中に「answer」と同じ言葉が含まれる場合、そこを自動穴埋めにする
-            else if (item.answer && displayHtml.includes(item.answer)) {
-                const regex = new RegExp(item.answer, 'g');
-                displayHtml = displayHtml.replace(regex, `<span class="blank-word" onclick="toggleBlank(this)">${item.answer}</span>`);
-            } 
-            // パターン3: どちらでもない場合は末尾に答えボタンを出現させる
-            else if (item.answer) {
-                displayHtml += `<br><br>👉 正解: <span class="blank-word" onclick="toggleBlank(this)">${item.answer}</span>`;
+            // 2. メインの暗記文として「正解（answer）」を使い、その中の特定キーワードを自動的に隠す
+            let targetText = item.answer;
+            let displayHtml = "";
+            
+            // 疾患名や重要ワードを自動的に伏せ字（黒塗り）にするリスト
+            const keywords = [
+                "ライノウイルス", "肺炎球菌", "マイコプラズマ", "インフルエンザ菌", "血小板増多", "赤血球数", 
+                "頑固な咳", "高熱", "乾性咳", "慢性気管支炎", "動脈血酸素分圧", "CO2ナルコーシス", "1か月以上", 
+                "喫煙", "拘束性障害", "肺コンプライアンス", "細菌性肺炎", "ギラン・バレー", "散瞳", "スパイログラフィー", 
+                "眼裂狭小", "交感神経", "超音波検査", "緊張性気胸", "刺激性の咳", "肥満者", "胸痛", "筋緊張亢進", 
+                "身体各部", "高血糖", "月経異常", "下垂体前葉機能不全症", "眼球突出", "視力障害", "高身長", 
+                "脳腫瘍", "水制限試験", "頻脈", "手指振戦", "月経過多", "テタニー", "発汗過多", "体重減少", 
+                "男性", "アジソン病", "眼球陥凹", "腱反射亢進", "褐色細胞腫", "コン症候群", "シモンズ病", 
+                "原発性アルドステロン症", "色素沈着", "ナトリウムイオン", "多毛", "アルカローシス", "橋本病", "肥満"
+            ];
+            
+            let replaced = false;
+            
+            // もしデータ側にすでに【】がついていたらそれを優先
+            if (targetText.includes('【') && targetText.includes('】')) {
+                displayHtml = targetText.replace(/【(.*?)】/g, '<span class="blank-word" onclick="toggleBlank(this)">$1</span>');
+                replaced = true;
+            } else {
+                // キーワードリストに一致するものがあれば黒塗りに置換
+                for (let word of keywords) {
+                    if (targetText.includes(word)) {
+                        const regex = new RegExp(word, 'g');
+                        targetText = targetText.replace(regex, `<span class="blank-word" onclick="toggleBlank(this)">${word}</span>`);
+                        replaced = true;
+                    }
+                }
+                displayHtml = targetText;
             }
             
-            document.getElementById('card-text').innerHTML = displayHtml;
+            // 万が一キーワードに引っかからなかった場合は、文章の後半半分を丸ごと隠す
+            if (!replaced && targetText.length > 3) {
+                const half = Math.floor(targetText.length / 2);
+                const front = targetText.substring(0, half);
+                const back = targetText.substring(half);
+                displayHtml = `${front}<span class="blank-word" onclick="toggleBlank(this)">${back}</span>`;
+            }
             
-            // 解説表示の処理
+            document.getElementById('card-text').innerHTML = `📢 正解の記述:<br> ${displayHtml}`;
+            
+            // 解説ボックスの設定
             const expBox = document.getElementById('explanation-box');
             if (item.explanation) {
                 expBox.innerText = `💡 解説: ${item.explanation}`;
