@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>臨床医学各論 4択演習マスター</title>
+    <title>臨床医学各論 穴埋め暗記カード</title>
     <style>
         :root {
             --main-bg: #F8F9FA;
             --card-bg: #FFFFFF;
-            --accent-orange: #E67E22;
             --accent-blue: #3498DB;
             --text-main: #2C3E50;
             --text-dim: #7F8C8D;
@@ -28,30 +27,26 @@
         section { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 18px; margin-bottom: 15px; }
         h3 { margin: 0 0 12px 0; font-size: 0.9rem; font-weight: 800; color: var(--text-main); }
         .select-box { width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 700; border: 1px solid #ced4da; border-radius: 12px; background-color: #fff; color: var(--text-main); cursor: pointer; outline: none; box-sizing: border-box; }
-        .start-btn { width: 100%; padding: 14px; font-size: 1rem; border-radius: 12px; font-weight: 800; border: none; cursor: pointer; transition: transform 0.1s; box-sizing: border-box; text-align: center; background-color: var(--accent-orange); color: #FFF; box-shadow: 0 4px 6px rgba(230, 126, 34, 0.2); }
+        .start-btn { width: 100%; padding: 14px; font-size: 1rem; border-radius: 12px; font-weight: 800; border: none; cursor: pointer; transition: transform 0.1s; box-sizing: border-box; text-align: center; background-color: var(--accent-blue); color: #FFF; box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2); }
         .start-btn:active { transform: scale(0.98); }
-        .card-view, .setup-view { display: none; }
+        .card-view, .setup-view, .loading-view { display: none; }
         .progress-bar { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-dim); font-weight: bold; margin-bottom: 10px; padding: 0 5px; }
-        .flashcard { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 24px; padding: 30px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 15px; min-height: 180px; display: flex; flex-direction: column; justify-content: center; }
+        .flashcard { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 24px; padding: 30px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 15px; min-height: 220px; display: flex; flex-direction: column; justify-content: center; }
         .card-tag { font-size: 0.9rem; font-weight: 800; color: var(--text-dim); display: block; text-align: center; margin-bottom: 10px; }
         
-        /* 疾患名・タイトルを中央寄せ、オレンジ色で強調 */
-        .disease-name { font-size: 1.5rem; font-weight: 800; color: var(--accent-orange); text-align: center; margin: 5px 0 20px 0; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color); }
+        /* 疾患名を中央寄せ、文章より大きめの文字に調整 */
+        .disease-name { font-size: 1.5rem; font-weight: 800; color: var(--accent-blue); text-align: center; margin: 5px 0 20px 0; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color); }
         
-        .card-text { font-size: 1.15rem; font-weight: 700; line-height: 1.8; margin: 0 0 20px 0; word-break: break-all; text-align: left; color: var(--text-main); }
+        .card-text { font-size: 1.15rem; font-weight: 700; line-height: 1.9; margin: 0 0 20px 0; word-break: break-all; text-align: left; color: var(--text-main); }
         
-        /* 4択用の解答ボタンデザイン */
-        .quiz-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-        .option-btn { width: 100%; padding: 14px 18px; text-align: left; font-size: 1.05rem; font-weight: 700; background-color: #FFF; border: 1px solid var(--border-color); border-radius: 14px; cursor: pointer; transition: all 0.15s; color: var(--text-main); box-sizing: border-box; }
-        .option-btn:active { transform: scale(0.99); }
+        /* 穴埋め部分のインラインスタイル */
+        .blank-word { background-color: #2C3E50; color: #2C3E50; padding: 2px 6px; margin: 0 2px; border-radius: 6px; cursor: pointer; font-weight: 800; transition: all 0.2s; display: inline-block; line-height: 1.3; border-bottom: 2px solid #1a252f; }
+        .blank-word.revealed { background-color: #FFF2CC; color: #D68910; border-bottom: 2px solid #F9E79F; padding: 2px 8px; }
         
-        /* 正解・不正解のスタイル */
-        .option-btn.correct { background-color: #D4EFDF !important; color: #196F3D !important; border-color: #2ECC71 !important; }
-        .option-btn.incorrect { background-color: #FADBD8 !important; color: #78281F !important; border-color: #E74C3C !important; }
-        
-        .control-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 15px; }
-        .action-btn { padding: 14px; font-size: 0.95rem; font-weight: 800; border-radius: 12px; border: none; cursor: pointer; background-color: var(--accent-orange); color: #FFF; transition: transform 0.1s; display: none; text-align: center; width: 100%; box-shadow: 0 4px 6px rgba(230, 126, 34, 0.2); }
+        .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
+        .action-btn { padding: 14px; font-size: 0.95rem; font-weight: 800; border-radius: 12px; border: 1px solid var(--border-color); cursor: pointer; background-color: #FFF; color: var(--text-main); transition: transform 0.1s; }
         .action-btn:active { transform: scale(0.98); }
+        .action-btn.primary { background-color: var(--accent-blue); color: #FFF; border: none; }
     </style>
 </head>
 <body>
@@ -62,7 +57,7 @@
         </a>
 
         <h1>臨床医学各論</h1>
-        <div class="subtitle">4択演婚マスター</div>
+        <div class="subtitle">穴埋め暗記カード</div>
 
         <div id="setup-view" class="setup-view" style="display: block;">
             <section>
@@ -84,110 +79,107 @@
                     </label>
                 </div>
             </section>
-            <button class="start-btn" onclick="startQuiz()">4択クイズを開始する 🚀</button>
+            <button class="start-btn" onclick="startCards()">暗記カードを開始する 🚀</button>
         </div>
 
         <div id="card-view" class="card-view">
             <div class="progress-bar">
-                <span id="current-index">問題 1 / 10</span>
+                <span id="current-index">カード 1 / 10</span>
             </div>
             <div class="flashcard">
                 <div class="card-tag" id="card-tag">臨床医学各論</div>
                 <div class="disease-name" id="disease-name">疾患名</div>
                 <div class="card-text" id="card-text">問題文</div>
             </div>
-            
-            <div id="quiz-options" class="quiz-options"></div>
-
             <div class="control-grid">
-                <button id="next-btn" class="action-btn" onclick="nextQuestion()">次の問題へ ➔</button>
+                <button class="action-btn" onclick="toggleAllBlanks()">答えを表示 👁️</button>
+                <button class="action-btn primary" onclick="nextCard()">次のカード ➔</button>
             </div>
         </div>
     </div>
 
     <script>
-        // 先ほど提供いただいた全20問のデータを4択用に完全内蔵！
+        // ユーザーが作成した全20問のデータを完全格納！
         const rawData = [
-          { type: "呼吸器系", title: "かぜ症候群", text: "非型型肺炎について正しいのはどれか（※元データをもとに4択化）", options: ["急性カタル性炎症が主である", "80〜90％がウイルス感染に起因する", "成人ではライノウイルスが多い", "小児ではRSウイルスによるものが多い"], answer: "80〜90％がウイルス感染に起因する" },
-          { type: "呼吸器系", title: "インフルエンザ", text: "インフルエンザの典型的症状や特徴について正しいのはどれか", options: ["主にC型が人の間で大流行する", "典型的には緩徐に発症する", "突然の高熱や関節痛などの全身症状がみられる", "初期から下気道症状のみが単独で発生する"], answer: "突然の高熱や関節痛などの全身症状がみられる" },
-          { type: "呼吸器系", title: "急性気管支炎", text: "急性気管支炎の臨床所見について正しいのはどれか", options: ["胸部X線で肺野に明らかな異常陰影を認める", "咳嗽や痰などの下気道症状をきたす", "細菌性2次的感染を合併しても膿性痰は出ない", "上気道の炎症が波及することはない"], answer: "咳嗽や痰などの下気道症状をきたす" },
-          { type: "呼吸器系", title: "肺炎", text: "肺炎（細菌性肺炎・マイコプラズマ肺炎）について正しいのはどれか", options: ["初期は感冒様症状を呈し、進行すると胸痛などをきたす", "細菌性肺炎の多くは漿液性の薄い痰が特徴である", "原因菌として最も頻度が高いのはマイコプラズマである", "炎症の主座は上気道粘膜に限局される"], answer: "初期は感冒様症状を呈し、進行すると胸痛などをきたす" },
-          { type: "呼吸器系", title: "肺結核", text: "肺結核の感染様式や検査について正しいのはどれか", options: ["飛沫による接触感染が主たる経路である", "胸部X線では肺野の過膨張（滴状心）が特徴である", "血液検査ではクウォンティフェロン法が用いられる", "喀痰検査の染色法にはグラム染色のみが用いられる"], answer: "血液検査ではクウォンティフェロン法が用いられる" },
-          { type: "呼吸器系", title: "慢性閉塞性肺疾患（COPD）", text: "COPDの診断や肺機能検査について正しいのはどれか", options: ["最大の危険因子は飲酒である", "肺機能検査で1秒率が70%未満に低下する", "拘束性換気障害が主たる病態である", "気腫優位型は慢性気管支炎が原因となる"], answer: "肺機能検査で1秒率が70%未満に低下する" },
-          { type: "呼吸器系", title: "肺気腫", text: "肺気腫の身体所見やX線特徴について正しいのはどれか", options: ["十分な呼出のために口すぼめ呼吸を呈する", "残気量の減少により舟底状胸郭となる", "胸部X線では横隔膜の上昇がみられる", "胸部X線において肺野の透過性は低下する"], answer: "十分な呼出のために口すぼめ呼吸を呈する" },
-          { type: "呼吸器系", title: "慢性気管支炎", text: "慢性気管支炎の定義や治療について正しいのはどれか", options: ["1年間に1ヶ月以上続く咳嗽が1年以上あるもの", "1年間に3ヶ月以上続く咳嗽・喀痰が2年以上あるもの", "定義上、他の肺疾患の合併が必須となる", "呼吸リハビリではインスリン投与が行われる"], answer: "1年間に3ヶ月以上続く咳嗽・喀痰が2年以上あるもの" },
-          { type: "呼吸器系", title: "気管支喘息", text: "気管支喘息の病態について正しいのはどれか", options: ["好中球が主体の感染性炎症である", "気道の過敏性亢進と可逆性の気流制限を特徴とする", "発作時には吸気性の呼吸困難をきたす", "気流制限は不可逆的で治療による変化はない"], answer: "気道の過敏性亢進と可逆性の気流制限を特徴とする" },
-          { type: "呼吸器系", title: "特発性肺線維症", text: "特発性肺線維症の臨床特徴について正しいのはどれか", options: ["若年女性の非喫煙者に好発する", "聴診では低音性の連続性副雑音を聴取する", "胸部CTで肺底部に蜂巣肺を認め、拘束性障害を呈する", "初期から大量の膿性痰を伴う湿性咳嗽がみられる"], answer: "胸部CTで肺底部に蜂巣肺を認め、拘束性障害を呈する" },
-          { type: "呼吸器系", title: "原発性自然気胸", text: "原発性自然気胸の好発領域や症状について正しいのはどれか", options: ["高齢の肥満男性に好発する", "発症時には緩徐に進行する腹痛がみられる", "20歳前後の長身・やせ型の男性に好発する", "病側の胸痛や空咳、呼吸困難は伴わない"], answer: "20歳前後の長身・やせ型の男性に好発する" },
-          { type: "呼吸器系", title: "肺癌", text: "原発性肺癌の組織型について正しいのはどれか", options: ["非小細胞癌の中で扁平上皮癌が最も悪性度が高い", "組織型に関わらずすべて喫煙との因果関係は均一である", "組織組織の特徴により小細胞癌と非小細胞癌に大別される", "最も悪性度が高いのは腺癌である"], answer: "組織組織の特徴により小細胞癌と非小細胞癌に大別される" },
-          { type: "内分泌系", title: "クッシング症候群・クッシング病", text: "クッシング症候群・病の症状について正しいのはどれか", options: ["コルチゾールの慢性的な分泌低下が原因である", "満月様顔貌や中心性肥満などがみられる", "下垂体腺腫が原因の場合でも視野障害は起きない", "下垂体からのACTH過剰分泌によるものをアジソン病という"], answer: "満月様顔貌や中心性肥満などがみられる" },
-          { type: "内分泌系", title: "先端巨大症、巨人症", text: "成長ホルモン分泌過剰症について正しいのはどれか", options: ["骨端線閉鎖前の発症では先端巨大症となる", "骨端線閉鎖後の発症では巨人症となる", "下垂体前葉からの成長ホルモン分泌過剰が原因である", "副腎皮質ホルモンの過剰分泌が本態である"], answer: "下垂体前葉からの成長ホルモン分泌過剰が原因である" },
-          { type: "内分泌系", title: "尿崩症", text: "尿崩症の臨床症状について正しいのはどれか", options: ["下垂体前葉からのプロラクチン欠乏が原因である", "主症状は少尿と尿閉である", "1日の尿量が3リットル以上の低張尿となり、多飲を伴う", "高比重の濃縮尿が持続的に排泄される"], answer: "1日の尿量が3リットル以上の低張尿となり、多飲を伴う" },
-          { type: "内分泌系", title: "バセドウ病", text: "バセドウ病の三徴候（メルゼブルグの三徴）に該当するのはどれか", options: ["満月様顔貌・中心性肥満・高血圧", "びまん性甲状腺腫・眼球突出・頻脈", "易疲労性・寒がり・粘液水腫", "高血圧・高血糖・多汗"], answer: "びまん性甲状腺腫・眼球突出・頻脈" },
-          { type: "内分泌系", title: "甲状腺機能低下症", text: "甲状腺機能低下症の病態や症状について正しいのはどれか", options: ["成人に発症する先天性のものはクレチン病とよぶ", "自己免疫が原因となる代表疾患はバセドウ病である", "全身倦怠感、易疲労性、不活発、寒がりなどがみられる", "基礎代謝が著しく亢進し、頻脈や多汗を呈する"], answer: "全身倦怠感、易疲労性、不活発、寒がりなどがみられる" },
-          { type: "内分泌系", title: "原発性アルドステロン症", text: "原発性アルドステロン症（コン症候群）の病態について正しいのはどれか", options: ["アルドステロンはNa排泄とK再吸収を促進する", "低血圧症をきたす代表的な疾患である", "アルドステロンの過剰分泌により高血圧症などをきたす", "糖質コルチゾールの過剰分泌が主病態である"], answer: "アルドステロンの過剰分泌により高血圧症などをきたす" },
-          { type: "内分泌系", title: "アジソン病", text: "アジソン病の特徴について正しいのはどれか", options: ["慢性副腎皮質機能低下により、コルチゾールなどが低下する", "二次的にACTHが著しく低値を呈する", "症候性高血圧症の原因疾患の１つである", "副腎髄質カテコールアミンの過剰分泌が原因である"], answer: "慢性副腎皮質機能低下により、コルチゾールなどが低下する" },
-          { type: "内分泌系", title: "褐色細胞腫", text: "褐色細胞腫の5H症状に含まれないのはどれか（※逆選択に変更）", options: ["高血圧 (Hypertension)", "高血糖 (Hyperglycemia)", "代謝亢進 (Hypermetabolism)", "低張尿 (Hypotonic urine)"], answer: "低張尿 (Hypotonic urine)" }
+          { page: 1, type: "呼吸器系", title: "かぜ症候群", text: "かぜ症候群とは、鼻腔、咽頭、喉頭などの上気道粘膜の（1）の総称で、80～90％が（2）感染に起因する。成人では（3）ウイルスが、小児では（4）ウイルスによるものが多い。", answers: "急性カタル性炎症|ウイルス|ライノ|RS" },
+          { page: 2, type: "呼吸器系", title: "インフルエンザ", text: "インフルエンザとは、（1）ウイルスの感染症で３型に分類される。このうち人の間で流行するのは、（2）型と（3）型である。典型的症状は、突然38度以上の高熱、頭痛、関節痛、筋肉痛、全身倦怠感などの（4）症状が、続いて（5）症状がみられる。", answers: "インフルエンザ|A|B|全身|上気道" },
+          { page: 3, type: "呼吸器系", title: "急性気管支炎", text: "急性気管支炎は、上気道のかぜ症候群が気管支に波及して発症したものである。気管支粘膜の炎症により（1）や（2）などの下気道症状や（3）をきたす。細菌性２次的感染を合併すると、（4）が認められる。胸部X線で肺に（5）は認められない。", answers: "咳嗽|痰|発熱|膿性痰|異常陰影" },
+          { page: 4, type: "呼吸器系", title: "肺炎", text: "肺炎とは、（1）に生じた炎症性疾患である。初期は、咳嗽、喀痰、発熱等の（2）様症状を呈し、進行により（3）、呼吸困難などをきたす。細菌性肺炎の場合、（4）痰となる。（5）肺炎が、次いで（6）肺炎が多い。", answers: "肺胞や肺間質|感冒|胸痛|膿性|肺炎球菌|マイコプラズマ" },
+          { page: 5, type: "呼吸器系", title: "肺結核", text: "肺結核は、（1）による呼吸器感染症で、飛沫核の（2）感染の様式をとる。全身症状には、持続する（3）、盗汗、全身倦怠感、体重減少などを、呼吸器症状では、（4）、（5）、血痰などを2週間以上呈する。肺結核では、胸部X線で肺野に浸潤影（6）や、（7）を認める。血液検査は（8）法、喀痰検査は（9）染色法で、遺伝子学的検査ではPCR法により結核菌を同定。", answers: "結核菌|空気|微熱|咳嗽|喀痰|乾酪性肉芽腫|空洞化|クウォンティフェロン|チール・ネールゼン" },
+          { page: 6, type: "呼吸器系", title: "慢性閉塞性肺疾患（COPD）", text: "COPDの危険因子は（1）で、気道・肺胞に（2）が生じ、（3）を有する疾患の総称。慢性的な（4）や（5）、（6）を認め、肺機能検査では、気道抵抗増加による（7）の延長や、（8）が（9）%未満と低下する。COPDは（10）が原因となる気道病変優位型と、（11）が原因となる気腫優位型に分類される。", answers: "喫煙|慢性炎症|気流制限|咳嗽|痰|労作時呼吸困難|呼気|1秒率|70|慢性気管支炎|肺気腫" },
+          { page: 7, type: "呼吸器系", title: "肺気腫", text: "肺気腫では、末梢気道が虚脱による閉塞で、気流制限が生じる。その為、十分な呼出をするために（1）呼吸となる。また、（2）の増加により、（3）状胸郭となる。進行により低酸素血症から肺高血圧となり（4）となる。胸部X線では、肺野の過膨張所見として、（5）、や（6）がみられ、肺野での空気貯留により（7）が亢進する。", answers: "口すぼめ|残気量|ビア樽|右心不全|横隔膜平旦化|滴状心|透過性" },
+          { page: 8, type: "呼吸器系", title: "慢性気管支炎", text: "慢性気管支炎は、1年間に（1）カ月以上続く（2）や（3）が、（4）年以上続いている状態と定義される。呼吸リハビリテーションとしては、去痰をうながす（5）が行われる。", answers: "3|咳嗽|喀痰|2|体位排痰法" },
+          { page: 9, type: "呼吸器系", title: "気管支喘息", text: "気管支喘息は（1）、Ｔ細胞を主体とした気道の（2）性疾患。気道の（3）性亢進という特徴をもち、反復性の（4）性の気流制限を起こす。この気流制限を（5）といい、（6）を伴う（7）をきたす。", answers: "好酸球|慢性炎症|過敏|可逆|喘息発作|喘鳴|呼気性呼吸困難" },
+          { page: 10, type: "呼吸器系", title: "特発性肺線維症", text: "特発性肺線維症、50歳以上（1）喫煙者に多く原因不明。喀痰を伴わない（2）、発熱、徐々に増悪する（3）、（4）がみられる。（5）を聴取し、胸部CTで肺底部（6）を認め（7）換気障害をきたす。", answers: "男性|乾性咳嗽|労作時呼吸困難|ばち指|捻髪音|蜂巣肺|拘束性" },
+          { page: 11, type: "呼吸器系", title: "原発性自然気胸", text: "原発性自然気胸（1）歳前後の（2）、（3）型の（4）性に多い。突然出現する病側の（5）と（6）、呼吸困難、動悸、不安感などを自覚する。", answers: "20|長身|やせ|男性|胸痛|空咳" },
+          { page: 12, type: "呼吸器系", title: "肺癌", text: "原発性肺癌は、気管支から肺胞までの（1）を発生母地とし、癌組織の特徴により（2）癌、（3）癌に大別され、後者には、（4）癌、（5）癌、（6）癌がある。このうち最も悪性度が高いのが（7）癌である。", answers: "上皮細胞|小細胞|非小細胞|扁平上皮|腺|大細胞|小細胞" },
+          { page: 13, type: "内分泌系", title: "クッシング症候群・クッシング病", text: "クッシング症候群とは、慢性の（1）の過剰症である。このうち、下垂体腺腫からの（2）過剰分泌によるものを（3）という。症状には、（4）顔貌、（5）肥満、赤色皮膚線条、高血圧、月経異常や、下垂体腺腫による（6）半盲などがある。", answers: "コルチゾール|ACTH|クッシング病|満月様|中心性|両耳側" },
+          { page: 14, type: "内分泌系", title: "先端巨大症、巨人症", text: "下垂体前葉から分泌される（1）の分泌過剰症である。発症時期が骨端線の閉鎖前では、（2）、閉鎖後では（3）となる。", answers: "成長ホルモン|巨人症|先端巨大症" },
+          { page: 15, type: "内分泌系", title: "尿崩症", text: "下垂体（1）から分泌される（2）の分泌障害による疾患。（3）、（4）が主症状となり、口渇や口内灼熱感などを自覚する。1日の尿量が（5）㍑以上となり、尿は低張尿となる。", answers: "後葉|抗利尿ホルモン|多飲|多尿|3" },
+          { page: 16, type: "内分泌系", title: "バセドウ病", text: "（1）異常により甲状腺機能亢進をきたした疾患で、びまん性甲状腺腫を伴う。20～40歳代の（2）に多い。主な症状として、（3）の三徴候として、（4）、（5）、（6）を呈する。", answers: "自己免疫|女性|メルゼブルグ|びまん性甲状腺腫|眼球突出|頻脈" },
+          { page: 17, type: "内分泌系", title: "甲状腺機能低下症", text: "甲状腺機能低下症には、先天性の（1）、成人に発症する後天性の（2）、自己免疫が原因となる（3）がある。症状として、（4）、（5）、不活発、寒がりなどがみられる。", answers: "クレチン病|粘液水腫|橋本病|全身倦怠|易疲労性" },
+          { page: 18, type: "内分泌系", title: "原発性アルドステロン症", text: "副腎皮質からアルドステロンが過剰に分泌される疾患で、別名（1）症候群とよばれ、症候性（2）症をきたす疾患の１つである。アルドステロンは、（3）再吸収と（4）排泄促進作用をもつ。", answers: "コン|高血圧|Na|K" },
+          { page: 19, type: "内分泌系", title: "アジソン病", text: "慢性（1）機能低下により副腎皮質ホルモン（2、3、副腎アンドロゲン）分泌低下をきたす疾患。二次的に（4）高値を呈する。症候性（5）症原因疾患の１つである。", answers: "副腎皮質|コルチゾール|アルドステロン|ACTH|低血圧" },
+          { page: 20, type: "内分泌系", title: "褐色細胞腫", text: "クロム親和性細胞から発生する腫瘍で、（1）を過剰に産生・分泌する。５H症状として、（2）、（3）、（4）、（5）、（6）がある。", answers: "カテコールアミン|高血圧|高血糖|代謝亢進|頭痛|多汗" }
         ];
 
-        let quizQueue = []; let currentIndex = 0; let appState = 'setup'; let hasAnswered = false;
+        let cardQueue = []; let currentIndex = 0; let appState = 'setup';
 
-        function startQuiz() {
+        function startCards() {
             const selectedCategory = document.getElementById('category-select').value;
             const order = document.querySelector('input[name="order"]:checked').value;
             
-            quizQueue = selectedCategory === 'all' ? [...rawData] : rawData.filter(item => item.type === selectedCategory);
+            cardQueue = selectedCategory === 'all' ? [...rawData] : rawData.filter(item => item.type === selectedCategory);
             
-            if (order === 'shuffle') quizQueue.sort(() => Math.random() - 0.5);
+            if (order === 'shuffle') cardQueue.sort(() => Math.random() - 0.5);
             currentIndex = 0; appState = 'quiz';
             document.getElementById('setup-view').style.display = 'none';
             document.getElementById('card-view').style.display = 'block';
-            updateBackButton(); showQuestion();
+            updateBackButton(); showCard();
         }
 
-        function showQuestion() {
-            hasAnswered = false;
-            const item = quizQueue[currentIndex];
-            document.getElementById('current-index').innerText = `問題 ${currentIndex + 1} / ${quizQueue.length}`;
+        function showCard() {
+            const item = cardQueue[currentIndex];
+            document.getElementById('current-index').innerText = `カード ${currentIndex + 1} / ${cardQueue.length}`;
             document.getElementById('card-tag').innerText = `臨床医学各論 ＞ ${item.type}`;
-            document.getElementById('disease-name').innerText = item.title;
-            document.getElementById('card-text').innerText = item.text;
+            document.getElementById('disease-name').innerText = item.title; // 疾患名をドカンと中央に大きく！
             
-            document.getElementById('next-btn').style.display = 'none';
+            let displayHtml = item.text;
+            // 縦棒パイプ「|」で分割して個々の答えを取得
+            const answerParts = item.answers.split('|').map(p => p.trim());
             
-            // 選択肢ボタンの動的生成
-            const optionsContainer = document.getElementById('quiz-options');
-            optionsContainer.innerHTML = '';
+            // 全ての (1) や （２）を検出して置換
+            const numRegex = /([（\(][１２３４５６７８９０\d]+[）\)])/g;
+            let partIndex = 0;
             
-            item.options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.innerText = opt;
-                btn.onclick = () => selectOption(btn, opt, item.answer);
-                optionsContainer.appendChild(btn);
-            });
-        }
-
-        function selectOption(selectedBtn, chosenOpt, correctAns) {
-            if (hasAnswered) return; // 2度押し防止
-            hasAnswered = true;
-            
-            const buttons = document.querySelectorAll('.option-btn');
-            buttons.forEach(btn => {
-                if (btn.innerText === correctAns) {
-                    btn.classList.add('correct'); // 正解は緑色
-                } else if (btn === selectedBtn) {
-                    btn.classList.add('incorrect'); // 選んだ不正解は赤色
+            displayHtml = displayHtml.replace(numRegex, function(match) {
+                // カッコ内の数字だけを抽出（全角半角問わず）
+                const numOnly = match.replace(/[（\(\)）]/g, '');
+                let ansText = match;
+                
+                if (answerParts[partIndex]) {
+                    // 「1、急性カタル性炎症」の形にインライン完全結合！
+                    ansText = `${numOnly}、${answerParts[partIndex]}`;
                 }
+                partIndex++;
+                return `<span class="blank-word" onclick="toggleBlank(this)">${ansText}</span>`;
             });
             
-            document.getElementById('next-btn').style.display = 'block';
+            document.getElementById('card-text').innerHTML = displayHtml;
         }
 
-        function nextQuestion() {
+        function toggleBlank(el) { el.classList.toggle('revealed'); }
+        
+        function toggleAllBlanks() {
+            const blanks = document.querySelectorAll('.blank-word');
+            const anyHidden = Array.from(blanks).some(b => !b.classList.contains('revealed'));
+            blanks.forEach(b => { if (anyHidden) { b.classList.add('revealed'); } else { b.classList.remove('revealed'); } });
+        }
+
+        function nextCard() {
             currentIndex++;
-            if (currentIndex < quizQueue.length) { showQuestion(); } else {
-                alert('すべての問題が終了しました！お疲れ様でした！');
+            if (currentIndex < cardQueue.length) { showCard(); } else {
+                alert('すべてのカードの確認が終了しました！');
                 window.location.href = 'index.html';
             }
         }
@@ -195,7 +187,7 @@
         function handleBackClick(event) {
             if (appState === 'quiz') {
                 event.preventDefault();
-                if (confirm("演習を中断してメニューに戻りますか？")) { window.location.href = 'index.html'; }
+                if (confirm("暗記カードを終了してメニューに戻りますか？")) { window.location.href = 'index.html'; }
             }
         }
 
