@@ -60,7 +60,7 @@
         <div class="subtitle">4択演習マスター</div>
 
         <div id="loading-view" class="loading-view" style="display: block;">
-            <div class="status-msg">⏳ CSV問題データを読み込んでいます...</div>
+            <div class="status-msg" id="loading-msg">⏳ CSV問題データを読み込んでいます...</div>
         </div>
 
         <div id="setup-view" class="setup-view">
@@ -97,39 +97,70 @@
 
     <script>
         let rawData = []; let quizQueue = []; let currentIndex = 0; let score = 0; let hasAnswered = false; let appState = 'loading';
+        
         window.onload = function() {
-            fetch('data.csv').then(res => { if (!res.ok) throw new Error(); return res.text(); }).then(text => {
-                parseCSV(text);
-                if(rawData.length === 0) {
-                    document.getElementById('loading-view').innerHTML = '<div class="status-msg">⚠️ データエラー</div>';
-                } else {
-                    appState = 'setup'; generateCategoryOptions();
-                    document.getElementById('loading-view').style.display = 'none';
-                    document.getElementById('setup-view').style.display = 'block';
-                }
-            }).catch(() => {});
+            fetch('data.csv')
+                .then(res => { 
+                    if (!res.ok) throw new Error('CSVファイルの読み込みに失敗しました。'); 
+                    return res.text(); 
+                })
+                .then(text => {
+                    parseCSV(text);
+                    if(rawData.length === 0) {
+                        document.getElementById('loading-msg').innerHTML = '⚠️ 有効な4択データが見つかりませんでした。';
+                    } else {
+                        appState = 'setup'; 
+                        generateCategoryOptions();
+                        document.getElementById('loading-view').style.display = 'none';
+                        document.getElementById('setup-view').style.display = 'block';
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('loading-msg').innerHTML = '⚠️ エラー: ' + err.message;
+                });
         };
+
         function parseCSV(text) {
             const lines = text.split(/\r\n|\n/);
             for (let i = 1; i < lines.length; i++) {
                 if (!lines[i].trim()) continue;
                 const row = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(',');
                 const clean = (val) => val ? val.replace(/^"|"$/g, '').trim() : '';
+                
                 if (row.length >= 8) {
-                    const category = clean(row[1]); const subcategory = clean(row[2]); const question = clean(row[3]);
-                    const ans = clean(row[4]); const opt1 = clean(row[5]); const opt2 = clean(row[6]); const opt3 = clean(row[7]);
+                    const category = clean(row[1]); 
+                    const subcategory = clean(row[2]); 
+                    const question = clean(row[3]);
+                    const ans = clean(row[4]); 
+                    const opt1 = clean(row[5]); 
+                    const opt2 = clean(row[6]); 
+                    const opt3 = clean(row[7]);
+                    
                     if (question && ans && opt1) {
-                        rawData.push({ mainCategory: category, tag: `${category} (${subcategory})`, question: question, answer: ans, options: [ans, opt1, opt2, opt3].filter(Boolean) });
+                        rawData.push({ 
+                            mainCategory: category, 
+                            tag: `${category} (${subcategory})`, 
+                            question: question, 
+                            answer: ans, 
+                            options: [ans, opt1, opt2, opt3].filter(Boolean) 
+                        });
                     }
                 }
             }
         }
+
         function generateCategoryOptions() {
             const selectEl = document.getElementById('category-select');
             selectEl.innerHTML = '<option value="all">すべて（全カテゴリ）</option>';
             const categories = [...new Set(rawData.map(item => item.mainCategory))].filter(Boolean);
-            categories.forEach(cat => { const opt = document.createElement('option'); opt.value = cat; opt.innerText = cat; selectEl.appendChild(opt); });
+            categories.forEach(cat => { 
+                const opt = document.createElement('option'); 
+                opt.value = cat; 
+                opt.innerText = cat; 
+                selectEl.appendChild(opt); 
+            });
         }
+
         function startQuiz() {
             const selectedCategory = document.getElementById('category-select').value;
             const countValue = document.getElementById('count-select').value;
@@ -141,6 +172,7 @@
             document.getElementById('quiz-view').style.display = 'block';
             updateBackButton(); showQuestion();
         }
+
         function showQuestion() {
             hasAnswered = false; const item = quizQueue[currentIndex];
             document.getElementById('quiz-progress').innerText = `問題 ${currentIndex + 1} / ${quizQueue.length}`;
@@ -156,6 +188,7 @@
                 btn.onclick = () => checkAnswer(btn, opt, item.answer); container.appendChild(btn);
             });
         }
+
         function checkAnswer(selectedBtn, selectedValue, correctValue) {
             if (hasAnswered) return; hasAnswered = true;
             const buttons = document.querySelectorAll('.option-btn'); const feedback = document.getElementById('feedback-box');
@@ -168,20 +201,22 @@
             document.getElementById('quiz-score').innerText = `正解: ${score}`;
             feedback.style.display = 'block'; document.getElementById('next-btn').style.display = 'block';
         }
+
         function nextQuestion() {
             currentIndex++;
             if (currentIndex < quizQueue.length) { showQuestion(); } else {
                 alert(`演習終了！あなたのスコア: ${score} / ${quizQueue.length}`);
-                /* 【修正】終了時も各論メニューに戻る */
                 window.location.href = 'index.html';
             }
         }
+
         function handleBackClick(event) {
             if (appState === 'quiz') {
                 event.preventDefault();
                 if (confirm("演習を中断してメニューに戻りますか？")) { window.location.href = 'index.html'; }
             }
         }
+
         function updateBackButton() {
             const textEl = document.getElementById("back-text");
             textEl.innerText = appState === 'quiz' ? "中断してメニューへ" : "メニューへ戻る";
