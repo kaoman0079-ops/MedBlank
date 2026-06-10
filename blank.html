@@ -33,16 +33,22 @@
         .progress-bar { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-dim); font-weight: bold; margin-bottom: 10px; padding: 0 5px; }
         .flashcard { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 24px; padding: 30px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 15px; min-height: 220px; display: flex; flex-direction: column; justify-content: center; }
         .card-tag { font-size: 0.9rem; font-weight: 800; color: var(--text-dim); display: block; text-align: center; margin-bottom: 10px; }
+        
+        /* 疾患名を中央寄せ、文章より大きめの文字に調整 */
         .disease-name { font-size: 1.5rem; font-weight: 800; color: var(--accent-blue); text-align: center; margin: 5px 0 20px 0; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color); }
+        
         .card-text { font-size: 1.15rem; font-weight: 700; line-height: 1.9; margin: 0 0 20px 0; word-break: break-all; text-align: left; color: var(--text-main); }
         .explanation-box { background-color: #F8F9FA; border-left: 4px solid var(--accent-blue); padding: 12px 15px; font-size: 0.95rem; border-radius: 0 8px 8px 0; color: #566573; line-height: 1.5; font-weight: 600; display: none; margin-top: 10px; }
+        
+        /* 穴埋め部分のインラインスタイル */
         .blank-word { background-color: #2C3E50; color: #2C3E50; padding: 2px 6px; margin: 0 2px; border-radius: 6px; cursor: pointer; font-weight: 800; transition: all 0.2s; display: inline-block; line-height: 1.3; border-bottom: 2px solid #1a252f; }
         .blank-word.revealed { background-color: #FFF2CC; color: #D68910; border-bottom: 2px solid #F9E79F; padding: 2px 8px; }
+        
         .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
         .action-btn { padding: 14px; font-size: 0.95rem; font-weight: 800; border-radius: 12px; border: 1px solid var(--border-color); cursor: pointer; background-color: #FFF; color: var(--text-main); transition: transform 0.1s; }
         .action-btn:active { transform: scale(0.98); }
         .action-btn.primary { background-color: var(--accent-blue); color: #FFF; border: none; }
-        .status-msg { text-align: center; padding: 40px 20px; font-weight: bold; color: var(--text-dim); }
+        .status-msg { text-align: center; padding: 40px 20px; font-weight: bold; color: var(--text-dim); line-height: 1.6; }
     </style>
 </head>
 <body>
@@ -56,7 +62,7 @@
         <div class="subtitle">穴埋め暗記カード</div>
 
         <div id="loading-view" class="loading-view" style="display: block;">
-            <div class="status-msg" id="loading-msg">⏳ CSV問題データ(data2.csv)を読み込んでいます...</div>
+            <div class="status-msg" id="loading-msg">⏳ CSV問題データを読み込んでいます...</div>
         </div>
 
         <div id="setup-view" class="setup-view">
@@ -99,27 +105,35 @@
         let rawData = []; let cardQueue = []; let currentIndex = 0; let appState = 'loading';
         
         window.onload = function() {
-            // 文字化け(Shift-JIS)対策として、一回バイナリ配列として取得してからデコードを試みる
+            // まず新データの「data2.csv」を読みに行く
             fetch('data2.csv')
                 .then(res => {
-                    if (!res.ok) throw new Error('data2.csv の読み込みに失敗しました。');
+                    if (!res.ok) {
+                        // もし data2.csv がまだGitHubにない場合は、自動で従来の data.csv に切り替える
+                        console.log('data2.csv が見つからないため data.csv を読み込みます');
+                        return fetch('data.csv');
+                    }
+                    return res;
+                })
+                .then(res => {
+                    if (!res.ok) throw new Error('CSV問題ファイルが一切見つかりません。');
                     return res.arrayBuffer();
                 })
                 .then(buffer => {
-                    // まずUTF-8でデコード
-                    let decoder = new TextDecoder('utf-8');
-                    let text = decoder.decode(buffer);
-                    
-                    // もし激しく文字化けしているか、正しく読めていなさそうな場合はShift-JISで再デコード
-                    if (text.includes('') || (!text.includes(',') && text.length > 0)) {
-                        decoder = new TextDecoder('shift-jis');
-                        text = decoder.decode(buffer);
+                    // Shift-JIS と UTF-8 の両方に対応する安全なデコード処理
+                    let text = "";
+                    try {
+                        let utf8Decoder = new TextDecoder('utf-8', {fatal: true});
+                        text = utf8Decoder.decode(buffer);
+                    } catch(e) {
+                        let sjisDecoder = new TextDecoder('shift-jis');
+                        text = sjisDecoder.decode(buffer);
                     }
                     
                     parseCSV(text);
                     
                     if(rawData.length === 0) {
-                        document.getElementById('loading-msg').innerHTML = '⚠️ data2.csv から有効なデータが見つかりませんでした。列の構成を確認してください。';
+                        document.getElementById('loading-msg').innerHTML = '⚠️ 有効なCSVデータを取り込めませんでした。<br>ファイルの列並び（カテゴリ、疾患名、問題、正解）を確認してください。';
                     } else {
                         appState = 'setup'; 
                         generateCategoryOptions();
@@ -128,19 +142,15 @@
                     }
                 })
                 .catch(err => {
-                    document.getElementById('loading-msg').innerHTML = '⚠️ エラー: ' + err.message;
+                    document.getElementById('loading-msg').innerHTML = '⚠️ エラーが発生しました:<br>' + err.message;
                 });
         };
 
-        // セル内改行やクォーテーションを壊さずに安全に切り分けるロジック
+        // CSVを安全に配列化する関数
         function parseCSV(text) {
-            let lines = [];
-            let row = [""];
-            let inQuotes = false;
-
+            let lines = []; let row = [""]; let inQuotes = false;
             for (let i = 0; i < text.length; i++) {
-                let c = text[i];
-                let next = text[i+1];
+                let c = text[i]; let next = text[i+1];
                 if (c === '"') {
                     if (inQuotes && next === '"') { row[row.length - 1] += '"'; i++; }
                     else { inQuotes = !inQuotes; }
@@ -148,8 +158,7 @@
                     row.push("");
                 } else if ((c === '\r' || c === '\n') && !inQuotes) {
                     if (c === '\r' && next === '\n') { i++; }
-                    lines.push(row);
-                    row = [""];
+                    lines.push(row); row = [""];
                 } else {
                     row[row.length - 1] += c;
                 }
@@ -163,7 +172,6 @@
                 const category = columns[1].trim(); 
                 const subcategory = columns[2] ? columns[2].trim() : ""; 
                 const question = columns[3] ? columns[3].trim() : "";
-                // 列数がズレていても柔軟に5列目、6列目、7列目から答えと解説を抽出
                 const answer = columns[5] ? columns[5].trim() : (columns[4] ? columns[4].trim() : "");
                 const explanation = columns[6] ? columns[6].trim() : "";
                 
@@ -186,9 +194,7 @@
             const categories = [...new Set(rawData.map(item => item.mainCategory))].filter(Boolean);
             categories.forEach(cat => { 
                 const opt = document.createElement('option'); 
-                opt.value = cat; 
-                opt.innerText = cat; 
-                selectEl.appendChild(opt); 
+                opt.value = cat; opt.innerText = cat; selectEl.appendChild(opt); 
             });
         }
 
@@ -198,8 +204,7 @@
             cardQueue = selectedCategory === 'all' ? [...rawData] : rawData.filter(item => item.mainCategory === selectedCategory);
             
             if (cardQueue.length === 0) {
-                alert('選択されたカテゴリのデータがありません。');
-                return;
+                alert('選択されたカテゴリのデータがありません。'); return;
             }
             
             if (order === 'shuffle') cardQueue.sort(() => Math.random() - 0.5);
@@ -213,11 +218,12 @@
             const item = cardQueue[currentIndex];
             document.getElementById('current-index').innerText = `カード ${currentIndex + 1} / ${cardQueue.length}`;
             document.getElementById('card-tag').innerText = item.tag;
-            document.getElementById('disease-name').innerText = item.disease;
+            document.getElementById('disease-name').innerText = item.disease; // 疾患名を中央に大きく表示
             
             let displayHtml = item.question;
             const numRegex = /([（\(][１２３４５６７８９０\d][）\)])/g;
             
+            // （１）や（２）の穴埋め置換ロジック
             if (numRegex.test(displayHtml) && item.answer) {
                 const answerParts = item.answer.split(/[,、\/／\s\n]+/).map(p => p.trim()).filter(Boolean);
                 let partIndex = 0;
