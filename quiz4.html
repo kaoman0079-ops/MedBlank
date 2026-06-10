@@ -9,11 +9,10 @@
             --main-bg: #F8F9FA;
             --card-bg: #FFFFFF;
             --accent-orange: #E67E22;
+            --accent-blue: #3498DB;
             --text-main: #2C3E50;
             --text-dim: #7F8C8D;
             --border-color: #E1E8ED;
-            --success-color: #2ECC71;
-            --error-color: #E74C3C;
         }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
@@ -31,22 +30,28 @@
         .select-box { width: 100%; padding: 12px; font-size: 0.95rem; font-weight: 700; border: 1px solid #ced4da; border-radius: 12px; background-color: #fff; color: var(--text-main); cursor: pointer; outline: none; box-sizing: border-box; }
         .start-btn { width: 100%; padding: 14px; font-size: 1rem; border-radius: 12px; font-weight: 800; border: none; cursor: pointer; transition: transform 0.1s; box-sizing: border-box; text-align: center; background-color: var(--accent-orange); color: #FFF; box-shadow: 0 4px 6px rgba(230, 126, 34, 0.2); }
         .start-btn:active { transform: scale(0.98); }
-        .quiz-view, .setup-view, .loading-view { display: none; }
+        .card-view, .setup-view { display: none; }
         .progress-bar { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-dim); font-weight: bold; margin-bottom: 10px; padding: 0 5px; }
-        .quiz-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 24px; padding: 25px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 15px; }
-        .card-tag { font-size: 1.1rem; font-weight: 800; color: var(--accent-orange); display: block; text-align: center; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px dashed var(--border-color); }
-        .question-text { font-size: 1.15rem; font-weight: 700; line-height: 1.6; margin: 0 0 20px 0; text-align: left; }
-        .options-list { display: flex; flex-direction: column; gap: 10px; }
-        .option-btn { width: 100%; padding: 14px 18px; font-size: 0.95rem; font-weight: 700; text-align: left; background-color: #FFF; border: 1px solid var(--border-color); border-radius: 14px; cursor: pointer; transition: background-color 0.2s, border-color 0.2s; box-sizing: border-box; }
-        .option-btn:not(.disabled):active { background-color: #F8F9FA; }
-        .option-btn.correct { background-color: #E8F8F5 !important; border-color: var(--success-color) !important; color: #117A65 !important; }
-        .option-btn.wrong { background-color: #FDEDEC !important; border-color: var(--error-color) !important; color: #78281F !important; }
-        .option-btn.disabled { cursor: default; opacity: 0.7; }
-        .feedback-box { display: none; margin-top: 15px; padding: 15px; border-radius: 14px; font-weight: bold; text-align: center; font-size: 1.1rem; }
-        .feedback-box.correct { background-color: var(--success-color); color: white; }
-        .feedback-box.wrong { background-color: var(--error-color); color: white; }
-        .next-btn { display: none; width: 100%; padding: 14px; font-size: 1rem; border-radius: 12px; font-weight: 800; border: none; cursor: pointer; margin-top: 15px; background-color: var(--text-main); color: #FFF; text-align: center; }
-        .status-msg { text-align: center; padding: 40px 20px; font-weight: bold; color: var(--text-dim); }
+        .flashcard { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 24px; padding: 30px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 15px; min-height: 180px; display: flex; flex-direction: column; justify-content: center; }
+        .card-tag { font-size: 0.9rem; font-weight: 800; color: var(--text-dim); display: block; text-align: center; margin-bottom: 10px; }
+        
+        /* 疾患名・タイトルを中央寄せ、オレンジ色で強調 */
+        .disease-name { font-size: 1.5rem; font-weight: 800; color: var(--accent-orange); text-align: center; margin: 5px 0 20px 0; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color); }
+        
+        .card-text { font-size: 1.15rem; font-weight: 700; line-height: 1.8; margin: 0 0 20px 0; word-break: break-all; text-align: left; color: var(--text-main); }
+        
+        /* 4択用の解答ボタンデザイン */
+        .quiz-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .option-btn { width: 100%; padding: 14px 18px; text-align: left; font-size: 1.05rem; font-weight: 700; background-color: #FFF; border: 1px solid var(--border-color); border-radius: 14px; cursor: pointer; transition: all 0.15s; color: var(--text-main); box-sizing: border-box; }
+        .option-btn:active { transform: scale(0.99); }
+        
+        /* 正解・不正解のスタイル */
+        .option-btn.correct { background-color: #D4EFDF !important; color: #196F3D !important; border-color: #2ECC71 !important; }
+        .option-btn.incorrect { background-color: #FADBD8 !important; color: #78281F !important; border-color: #E74C3C !important; }
+        
+        .control-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 15px; }
+        .action-btn { padding: 14px; font-size: 0.95rem; font-weight: 800; border-radius: 12px; border: none; cursor: pointer; background-color: var(--accent-orange); color: #FFF; transition: transform 0.1s; display: none; text-align: center; width: 100%; box-shadow: 0 4px 6px rgba(230, 126, 34, 0.2); }
+        .action-btn:active { transform: scale(0.98); }
     </style>
 </head>
 <body>
@@ -57,155 +62,132 @@
         </a>
 
         <h1>臨床医学各論</h1>
-        <div class="subtitle">4択演習マスター</div>
+        <div class="subtitle">4択演婚マスター</div>
 
-        <div id="loading-view" class="loading-view" style="display: block;">
-            <div class="status-msg" id="loading-msg">⏳ CSV問題データを読み込んでいます...</div>
-        </div>
-
-        <div id="setup-view" class="setup-view">
+        <div id="setup-view" class="setup-view" style="display: block;">
             <section>
                 <h3>出題カテゴリ</h3>
-                <select id="category-select" class="select-box"></select>
-            </section>
-            <section>
-                <h3>問題数</h3>
-                <select id="count-select" class="select-box">
-                    <option value="5">5問</option>
-                    <option value="10" selected>10問</option>
-                    <option value="20">20問</option>
-                    <option value="all">全問出題</option>
+                <select id="category-select" class="select-box">
+                    <option value="all">すべて（全20問）</option>
+                    <option value="呼吸器系">呼吸器系（1〜12）</option>
+                    <option value="内分泌系">内分泌系（13〜20）</option>
                 </select>
             </section>
-            <button class="start-btn" onclick="startQuiz()">クイズを開始する 🚀</button>
+            <section>
+                <h3>出題順序</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <label style="background: #fff; border: 1px solid #ced4da; padding: 12px; text-align: center; border-radius: 12px; font-weight: bold; cursor: pointer;">
+                        <input type="radio" name="order" value="shuffle" checked style="margin-right: 5px;">ランダム
+                    </label>
+                    <label style="background: #fff; border: 1px solid #ced4da; padding: 12px; text-align: center; border-radius: 12px; font-weight: bold; cursor: pointer;">
+                        <input type="radio" name="order" value="normal" style="margin-right: 5px;">標準順
+                    </label>
+                </div>
+            </section>
+            <button class="start-btn" onclick="startQuiz()">4択クイズを開始する 🚀</button>
         </div>
 
-        <div id="quiz-view" class="quiz-view">
+        <div id="card-view" class="card-view">
             <div class="progress-bar">
-                <span id="quiz-progress">問題 1 / 10</span>
-                <span id="quiz-score">正解: 0</span>
+                <span id="current-index">問題 1 / 10</span>
             </div>
-            <div class="quiz-card">
-                <div class="card-tag" id="card-tag">カテゴリ</div>
-                <p class="question-text" id="question-text">問題文</p>
-                <div class="options-list" id="options-container"></div>
+            <div class="flashcard">
+                <div class="card-tag" id="card-tag">臨床医学各論</div>
+                <div class="disease-name" id="disease-name">疾患名</div>
+                <div class="card-text" id="card-text">問題文</div>
             </div>
-            <div id="feedback-box" class="feedback-box"></div>
-            <button id="next-btn" class="next-btn" onclick="nextQuestion()">次の問題へ ➔</button>
+            
+            <div id="quiz-options" class="quiz-options"></div>
+
+            <div class="control-grid">
+                <button id="next-btn" class="action-btn" onclick="nextQuestion()">次の問題へ ➔</button>
+            </div>
         </div>
     </div>
 
     <script>
-        let rawData = []; let quizQueue = []; let currentIndex = 0; let score = 0; let hasAnswered = false; let appState = 'loading';
-        
-        window.onload = function() {
-            fetch('data.csv')
-                .then(res => { 
-                    if (!res.ok) throw new Error('CSVファイルの読み込みに失敗しました。'); 
-                    return res.text(); 
-                })
-                .then(text => {
-                    parseCSV(text);
-                    if(rawData.length === 0) {
-                        document.getElementById('loading-msg').innerHTML = '⚠️ 有効な4択データが見つかりませんでした。';
-                    } else {
-                        appState = 'setup'; 
-                        generateCategoryOptions();
-                        document.getElementById('loading-view').style.display = 'none';
-                        document.getElementById('setup-view').style.display = 'block';
-                    }
-                })
-                .catch(err => {
-                    document.getElementById('loading-msg').innerHTML = '⚠️ エラー: ' + err.message;
-                });
-        };
+        // 先ほど提供いただいた全20問のデータを4択用に完全内蔵！
+        const rawData = [
+          { type: "呼吸器系", title: "かぜ症候群", text: "非型型肺炎について正しいのはどれか（※元データをもとに4択化）", options: ["急性カタル性炎症が主である", "80〜90％がウイルス感染に起因する", "成人ではライノウイルスが多い", "小児ではRSウイルスによるものが多い"], answer: "80〜90％がウイルス感染に起因する" },
+          { type: "呼吸器系", title: "インフルエンザ", text: "インフルエンザの典型的症状や特徴について正しいのはどれか", options: ["主にC型が人の間で大流行する", "典型的には緩徐に発症する", "突然の高熱や関節痛などの全身症状がみられる", "初期から下気道症状のみが単独で発生する"], answer: "突然の高熱や関節痛などの全身症状がみられる" },
+          { type: "呼吸器系", title: "急性気管支炎", text: "急性気管支炎の臨床所見について正しいのはどれか", options: ["胸部X線で肺野に明らかな異常陰影を認める", "咳嗽や痰などの下気道症状をきたす", "細菌性2次的感染を合併しても膿性痰は出ない", "上気道の炎症が波及することはない"], answer: "咳嗽や痰などの下気道症状をきたす" },
+          { type: "呼吸器系", title: "肺炎", text: "肺炎（細菌性肺炎・マイコプラズマ肺炎）について正しいのはどれか", options: ["初期は感冒様症状を呈し、進行すると胸痛などをきたす", "細菌性肺炎の多くは漿液性の薄い痰が特徴である", "原因菌として最も頻度が高いのはマイコプラズマである", "炎症の主座は上気道粘膜に限局される"], answer: "初期は感冒様症状を呈し、進行すると胸痛などをきたす" },
+          { type: "呼吸器系", title: "肺結核", text: "肺結核の感染様式や検査について正しいのはどれか", options: ["飛沫による接触感染が主たる経路である", "胸部X線では肺野の過膨張（滴状心）が特徴である", "血液検査ではクウォンティフェロン法が用いられる", "喀痰検査の染色法にはグラム染色のみが用いられる"], answer: "血液検査ではクウォンティフェロン法が用いられる" },
+          { type: "呼吸器系", title: "慢性閉塞性肺疾患（COPD）", text: "COPDの診断や肺機能検査について正しいのはどれか", options: ["最大の危険因子は飲酒である", "肺機能検査で1秒率が70%未満に低下する", "拘束性換気障害が主たる病態である", "気腫優位型は慢性気管支炎が原因となる"], answer: "肺機能検査で1秒率が70%未満に低下する" },
+          { type: "呼吸器系", title: "肺気腫", text: "肺気腫の身体所見やX線特徴について正しいのはどれか", options: ["十分な呼出のために口すぼめ呼吸を呈する", "残気量の減少により舟底状胸郭となる", "胸部X線では横隔膜の上昇がみられる", "胸部X線において肺野の透過性は低下する"], answer: "十分な呼出のために口すぼめ呼吸を呈する" },
+          { type: "呼吸器系", title: "慢性気管支炎", text: "慢性気管支炎の定義や治療について正しいのはどれか", options: ["1年間に1ヶ月以上続く咳嗽が1年以上あるもの", "1年間に3ヶ月以上続く咳嗽・喀痰が2年以上あるもの", "定義上、他の肺疾患の合併が必須となる", "呼吸リハビリではインスリン投与が行われる"], answer: "1年間に3ヶ月以上続く咳嗽・喀痰が2年以上あるもの" },
+          { type: "呼吸器系", title: "気管支喘息", text: "気管支喘息の病態について正しいのはどれか", options: ["好中球が主体の感染性炎症である", "気道の過敏性亢進と可逆性の気流制限を特徴とする", "発作時には吸気性の呼吸困難をきたす", "気流制限は不可逆的で治療による変化はない"], answer: "気道の過敏性亢進と可逆性の気流制限を特徴とする" },
+          { type: "呼吸器系", title: "特発性肺線維症", text: "特発性肺線維症の臨床特徴について正しいのはどれか", options: ["若年女性の非喫煙者に好発する", "聴診では低音性の連続性副雑音を聴取する", "胸部CTで肺底部に蜂巣肺を認め、拘束性障害を呈する", "初期から大量の膿性痰を伴う湿性咳嗽がみられる"], answer: "胸部CTで肺底部に蜂巣肺を認め、拘束性障害を呈する" },
+          { type: "呼吸器系", title: "原発性自然気胸", text: "原発性自然気胸の好発領域や症状について正しいのはどれか", options: ["高齢の肥満男性に好発する", "発症時には緩徐に進行する腹痛がみられる", "20歳前後の長身・やせ型の男性に好発する", "病側の胸痛や空咳、呼吸困難は伴わない"], answer: "20歳前後の長身・やせ型の男性に好発する" },
+          { type: "呼吸器系", title: "肺癌", text: "原発性肺癌の組織型について正しいのはどれか", options: ["非小細胞癌の中で扁平上皮癌が最も悪性度が高い", "組織型に関わらずすべて喫煙との因果関係は均一である", "組織組織の特徴により小細胞癌と非小細胞癌に大別される", "最も悪性度が高いのは腺癌である"], answer: "組織組織の特徴により小細胞癌と非小細胞癌に大別される" },
+          { type: "内分泌系", title: "クッシング症候群・クッシング病", text: "クッシング症候群・病の症状について正しいのはどれか", options: ["コルチゾールの慢性的な分泌低下が原因である", "満月様顔貌や中心性肥満などがみられる", "下垂体腺腫が原因の場合でも視野障害は起きない", "下垂体からのACTH過剰分泌によるものをアジソン病という"], answer: "満月様顔貌や中心性肥満などがみられる" },
+          { type: "内分泌系", title: "先端巨大症、巨人症", text: "成長ホルモン分泌過剰症について正しいのはどれか", options: ["骨端線閉鎖前の発症では先端巨大症となる", "骨端線閉鎖後の発症では巨人症となる", "下垂体前葉からの成長ホルモン分泌過剰が原因である", "副腎皮質ホルモンの過剰分泌が本態である"], answer: "下垂体前葉からの成長ホルモン分泌過剰が原因である" },
+          { type: "内分泌系", title: "尿崩症", text: "尿崩症の臨床症状について正しいのはどれか", options: ["下垂体前葉からのプロラクチン欠乏が原因である", "主症状は少尿と尿閉である", "1日の尿量が3リットル以上の低張尿となり、多飲を伴う", "高比重の濃縮尿が持続的に排泄される"], answer: "1日の尿量が3リットル以上の低張尿となり、多飲を伴う" },
+          { type: "内分泌系", title: "バセドウ病", text: "バセドウ病の三徴候（メルゼブルグの三徴）に該当するのはどれか", options: ["満月様顔貌・中心性肥満・高血圧", "びまん性甲状腺腫・眼球突出・頻脈", "易疲労性・寒がり・粘液水腫", "高血圧・高血糖・多汗"], answer: "びまん性甲状腺腫・眼球突出・頻脈" },
+          { type: "内分泌系", title: "甲状腺機能低下症", text: "甲状腺機能低下症の病態や症状について正しいのはどれか", options: ["成人に発症する先天性のものはクレチン病とよぶ", "自己免疫が原因となる代表疾患はバセドウ病である", "全身倦怠感、易疲労性、不活発、寒がりなどがみられる", "基礎代謝が著しく亢進し、頻脈や多汗を呈する"], answer: "全身倦怠感、易疲労性、不活発、寒がりなどがみられる" },
+          { type: "内分泌系", title: "原発性アルドステロン症", text: "原発性アルドステロン症（コン症候群）の病態について正しいのはどれか", options: ["アルドステロンはNa排泄とK再吸収を促進する", "低血圧症をきたす代表的な疾患である", "アルドステロンの過剰分泌により高血圧症などをきたす", "糖質コルチゾールの過剰分泌が主病態である"], answer: "アルドステロンの過剰分泌により高血圧症などをきたす" },
+          { type: "内分泌系", title: "アジソン病", text: "アジソン病の特徴について正しいのはどれか", options: ["慢性副腎皮質機能低下により、コルチゾールなどが低下する", "二次的にACTHが著しく低値を呈する", "症候性高血圧症の原因疾患の１つである", "副腎髄質カテコールアミンの過剰分泌が原因である"], answer: "慢性副腎皮質機能低下により、コルチゾールなどが低下する" },
+          { type: "内分泌系", title: "褐色細胞腫", text: "褐色細胞腫の5H症状に含まれないのはどれか（※逆選択に変更）", options: ["高血圧 (Hypertension)", "高血糖 (Hyperglycemia)", "代謝亢進 (Hypermetabolism)", "低張尿 (Hypotonic urine)"], answer: "低張尿 (Hypotonic urine)" }
+        ];
 
-        function parseCSV(text) {
-            const lines = text.split(/\r\n|\n/);
-            for (let i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue;
-                const row = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(',');
-                const clean = (val) => val ? val.replace(/^"|"$/g, '').trim() : '';
-                
-                if (row.length >= 8) {
-                    const category = clean(row[1]); 
-                    const subcategory = clean(row[2]); 
-                    const question = clean(row[3]);
-                    const ans = clean(row[4]); 
-                    const opt1 = clean(row[5]); 
-                    const opt2 = clean(row[6]); 
-                    const opt3 = clean(row[7]);
-                    
-                    if (question && ans && opt1) {
-                        rawData.push({ 
-                            mainCategory: category, 
-                            tag: `${category} (${subcategory})`, 
-                            question: question, 
-                            answer: ans, 
-                            options: [ans, opt1, opt2, opt3].filter(Boolean) 
-                        });
-                    }
-                }
-            }
-        }
-
-        function generateCategoryOptions() {
-            const selectEl = document.getElementById('category-select');
-            selectEl.innerHTML = '<option value="all">すべて（全カテゴリ）</option>';
-            const categories = [...new Set(rawData.map(item => item.mainCategory))].filter(Boolean);
-            categories.forEach(cat => { 
-                const opt = document.createElement('option'); 
-                opt.value = cat; 
-                opt.innerText = cat; 
-                selectEl.appendChild(opt); 
-            });
-        }
+        let quizQueue = []; let currentIndex = 0; let appState = 'setup'; let hasAnswered = false;
 
         function startQuiz() {
             const selectedCategory = document.getElementById('category-select').value;
-            const countValue = document.getElementById('count-select').value;
-            quizQueue = selectedCategory === 'all' ? [...rawData] : rawData.filter(item => item.mainCategory === selectedCategory);
-            quizQueue.sort(() => Math.random() - 0.5);
-            if (countValue !== 'all') { quizQueue = quizQueue.slice(0, parseInt(countValue, 10)); }
-            currentIndex = 0; score = 0; appState = 'quiz';
+            const order = document.querySelector('input[name="order"]:checked').value;
+            
+            quizQueue = selectedCategory === 'all' ? [...rawData] : rawData.filter(item => item.type === selectedCategory);
+            
+            if (order === 'shuffle') quizQueue.sort(() => Math.random() - 0.5);
+            currentIndex = 0; appState = 'quiz';
             document.getElementById('setup-view').style.display = 'none';
-            document.getElementById('quiz-view').style.display = 'block';
+            document.getElementById('card-view').style.display = 'block';
             updateBackButton(); showQuestion();
         }
 
         function showQuestion() {
-            hasAnswered = false; const item = quizQueue[currentIndex];
-            document.getElementById('quiz-progress').innerText = `問題 ${currentIndex + 1} / ${quizQueue.length}`;
-            document.getElementById('quiz-score').innerText = `正解: ${score}`;
-            document.getElementById('card-tag').innerText = item.tag;
-            document.getElementById('question-text').innerText = item.question;
-            document.getElementById('feedback-box').style.display = 'none';
+            hasAnswered = false;
+            const item = quizQueue[currentIndex];
+            document.getElementById('current-index').innerText = `問題 ${currentIndex + 1} / ${quizQueue.length}`;
+            document.getElementById('card-tag').innerText = `臨床医学各論 ＞ ${item.type}`;
+            document.getElementById('disease-name').innerText = item.title;
+            document.getElementById('card-text').innerText = item.text;
+            
             document.getElementById('next-btn').style.display = 'none';
-            const shuffledOptions = [...item.options].sort(() => Math.random() - 0.5);
-            const container = document.getElementById('options-container'); container.innerHTML = '';
-            shuffledOptions.forEach(opt => {
-                const btn = document.createElement('button'); btn.className = 'option-btn'; btn.innerText = opt;
-                btn.onclick = () => checkAnswer(btn, opt, item.answer); container.appendChild(btn);
+            
+            // 選択肢ボタンの動的生成
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            
+            item.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => selectOption(btn, opt, item.answer);
+                optionsContainer.appendChild(btn);
             });
         }
 
-        function checkAnswer(selectedBtn, selectedValue, correctValue) {
-            if (hasAnswered) return; hasAnswered = true;
-            const buttons = document.querySelectorAll('.option-btn'); const feedback = document.getElementById('feedback-box');
-            buttons.forEach(btn => { btn.classList.add('disabled'); if (btn.innerText === correctValue) btn.classList.add('correct'); });
-            if (selectedValue === correctValue) {
-                score++; feedback.innerText = "⭕ 正解！"; feedback.className = "feedback-box correct"; selectedBtn.classList.add('correct');
-            } else {
-                feedback.innerText = `❌ 不正解... (正解: ${correctValue})`; feedback.className = "feedback-box wrong"; selectedBtn.classList.add('wrong');
-            }
-            document.getElementById('quiz-score').innerText = `正解: ${score}`;
-            feedback.style.display = 'block'; document.getElementById('next-btn').style.display = 'block';
+        function selectOption(selectedBtn, chosenOpt, correctAns) {
+            if (hasAnswered) return; // 2度押し防止
+            hasAnswered = true;
+            
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(btn => {
+                if (btn.innerText === correctAns) {
+                    btn.classList.add('correct'); // 正解は緑色
+                } else if (btn === selectedBtn) {
+                    btn.classList.add('incorrect'); // 選んだ不正解は赤色
+                }
+            });
+            
+            document.getElementById('next-btn').style.display = 'block';
         }
 
         function nextQuestion() {
             currentIndex++;
             if (currentIndex < quizQueue.length) { showQuestion(); } else {
-                alert(`演習終了！あなたのスコア: ${score} / ${quizQueue.length}`);
+                alert('すべての問題が終了しました！お疲れ様でした！');
                 window.location.href = 'index.html';
             }
         }
