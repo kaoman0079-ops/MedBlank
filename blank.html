@@ -38,7 +38,6 @@
         .disease-name { font-size: 1.5rem; font-weight: 800; color: var(--accent-blue); text-align: center; margin: 5px 0 20px 0; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color); }
         
         .card-text { font-size: 1.15rem; font-weight: 700; line-height: 1.9; margin: 0 0 20px 0; word-break: break-all; text-align: left; color: var(--text-main); }
-        .explanation-box { background-color: #F8F9FA; border-left: 4px solid var(--accent-blue); padding: 12px 15px; font-size: 0.95rem; border-radius: 0 8px 8px 0; color: #566573; line-height: 1.5; font-weight: 600; display: none; margin-top: 10px; }
         
         /* 穴埋め部分のインラインスタイル */
         .blank-word { background-color: #2C3E50; color: #2C3E50; padding: 2px 6px; margin: 0 2px; border-radius: 6px; cursor: pointer; font-weight: 800; transition: all 0.2s; display: inline-block; line-height: 1.3; border-bottom: 2px solid #1a252f; }
@@ -48,7 +47,6 @@
         .action-btn { padding: 14px; font-size: 0.95rem; font-weight: 800; border-radius: 12px; border: 1px solid var(--border-color); cursor: pointer; background-color: #FFF; color: var(--text-main); transition: transform 0.1s; }
         .action-btn:active { transform: scale(0.98); }
         .action-btn.primary { background-color: var(--accent-blue); color: #FFF; border: none; }
-        .status-msg { text-align: center; padding: 40px 20px; font-weight: bold; color: var(--text-dim); line-height: 1.6; }
     </style>
 </head>
 <body>
@@ -61,14 +59,14 @@
         <h1>臨床医学各論</h1>
         <div class="subtitle">穴埋め暗記カード</div>
 
-        <div id="loading-view" class="loading-view" style="display: block;">
-            <div class="status-msg" id="loading-msg">⏳ CSV問題データ(data2.csv)を読み込んでいます...</div>
-        </div>
-
-        <div id="setup-view" class="setup-view">
+        <div id="setup-view" class="setup-view" style="display: block;">
             <section>
                 <h3>出題カテゴリ</h3>
-                <select id="category-select" class="select-box"></select>
+                <select id="category-select" class="select-box">
+                    <option value="all">すべて（全20問）</option>
+                    <option value="呼吸器系">呼吸器系（1〜12）</option>
+                    <option value="内分泌系">内分泌系（13〜20）</option>
+                </select>
             </section>
             <section>
                 <h3>出題順序</h3>
@@ -89,10 +87,9 @@
                 <span id="current-index">カード 1 / 10</span>
             </div>
             <div class="flashcard">
-                <div class="card-tag" id="card-tag">カテゴリ</div>
+                <div class="card-tag" id="card-tag">臨床医学各論</div>
                 <div class="disease-name" id="disease-name">疾患名</div>
                 <div class="card-text" id="card-text">問題文</div>
-                <div class="explanation-box" id="explanation-box">解説文</div>
             </div>
             <div class="control-grid">
                 <button class="action-btn" onclick="toggleAllBlanks()">答えを表示 👁️</button>
@@ -102,192 +99,10 @@
     </div>
 
     <script>
-        let rawData = []; let cardQueue = []; let currentIndex = 0; let appState = 'loading';
-        
-        window.onload = function() {
-            // 他のファイルに浮気せず、data2.csv のみをターゲットにする
-            fetch('data2.csv')
-                .then(res => {
-                    if (!res.ok) throw new Error('data2.csv が見つかりません。ファイルが正しく配置されているか確認してください。');
-                    return res.arrayBuffer();
-                })
-                .then(buffer => {
-                    // Shift-JIS と UTF-8 の両対応デコード（フリーズバグ修正）
-                    let text = "";
-                    try {
-                        let utf8Decoder = new TextDecoder('utf-8', {fatal: true});
-                        text = utf8Decoder.decode(buffer);
-                    } catch(e) {
-                        let sjisDecoder = new TextDecoder('shift-jis');
-                        text = sjisDecoder.decode(buffer);
-                    }
-                    
-                    parseCSV(text);
-                    
-                    if(rawData.length === 0) {
-                        document.getElementById('loading-msg').innerHTML = '⚠️ data2.csv から有効な穴埋めデータを取り込めませんでした。<br>ファイルの列並び（カテゴリ、疾患名、問題文、正解）を確認してください。';
-                    } else {
-                        appState = 'setup'; 
-                        generateCategoryOptions();
-                        document.getElementById('loading-view').style.display = 'none';
-                        document.getElementById('setup-view').style.display = 'block';
-                    }
-                })
-                .catch(err => {
-                    document.getElementById('loading-msg').innerHTML = '⚠️ 読み込みエラー:<br>' + err.message;
-                });
-        };
-
-        // セル内改行やクォーテーションに対応した安全なCSV分割
-        function parseCSV(text) {
-            let lines = []; let row = [""]; let inQuotes = false;
-            for (let i = 0; i < text.length; i++) {
-                let c = text[i]; let next = text[i+1];
-                if (c === '"') {
-                    if (inQuotes && next === '"') { row[row.length - 1] += '"'; i++; }
-                    else { inQuotes = !inQuotes; }
-                } else if (c === ',' && !inQuotes) {
-                    row.push("");
-                } else if ((c === '\r' || c === '\n') && !inQuotes) {
-                    if (c === '\r' && next === '\n') { i++; }
-                    lines.push(row); row = [""];
-                } else {
-                    row[row.length - 1] += c;
-                }
-            }
-            if (row.length > 1 || row[0] !== "") lines.push(row);
-
-            // 1行目はヘッダーとしてスキップ
-            for (let i = 1; i < lines.length; i++) {
-                const columns = lines[i];
-                if (columns.length < 4 || !columns[1]) continue;
-
-                const category = columns[1].trim(); 
-                const subcategory = columns[2] ? columns[2].trim() : ""; 
-                const question = columns[3] ? columns[3].trim() : "";
-                const answer = columns[5] ? columns[5].trim() : (columns[4] ? columns[4].trim() : "");
-                const explanation = columns[6] ? columns[6].trim() : "";
-                
-                if (question) { 
-                    rawData.push({ 
-                        mainCategory: category, 
-                        tag: `${category} ＞ ${subcategory}`, 
-                        disease: subcategory || "重要疾患", 
-                        question: question,
-                        answer: answer,
-                        explanation: explanation
-                    }); 
-                }
-            }
-        }
-
-        function generateCategoryOptions() {
-            const selectEl = document.getElementById('category-select');
-            selectEl.innerHTML = '<option value="all">すべて（全カテゴリ）</option>';
-            const categories = [...new Set(rawData.map(item => item.mainCategory))].filter(Boolean);
-            categories.forEach(cat => { 
-                const opt = document.createElement('option'); 
-                opt.value = cat; opt.innerText = cat; selectEl.appendChild(opt); 
-            });
-        }
-
-        function startCards() {
-            const selectedCategory = document.getElementById('category-select').value;
-            const order = document.querySelector('input[name="order"]:checked').value;
-            cardQueue = selectedCategory === 'all' ? [...rawData] : rawData.filter(item => item.mainCategory === selectedCategory);
-            
-            if (cardQueue.length === 0) {
-                alert('選択されたカテゴリのデータがありません。'); return;
-            }
-            
-            if (order === 'shuffle') cardQueue.sort(() => Math.random() - 0.5);
-            currentIndex = 0; appState = 'quiz';
-            document.getElementById('setup-view').style.display = 'none';
-            document.getElementById('card-view').style.display = 'block';
-            updateBackButton(); showCard();
-        }
-
-        function showCard() {
-            const item = cardQueue[currentIndex];
-            document.getElementById('current-index').innerText = `カード ${currentIndex + 1} / ${cardQueue.length}`;
-            document.getElementById('card-tag').innerText = item.tag;
-            document.getElementById('disease-name').innerText = item.disease; // 病名を中央寄せ・大文字表示
-            
-            let displayHtml = item.question;
-            const numRegex = /([（\(][１２３４５６７８９０\d][）\)])/g;
-            
-            // 問題文の中の (1) や （２）を、答えとインライン合体させて隠すロジック
-            if (numRegex.test(displayHtml) && item.answer) {
-                const answerParts = item.answer.split(/[,、\/／\s\n]+/).map(p => p.trim()).filter(Boolean);
-                let partIndex = 0;
-                
-                displayHtml = item.question.replace(numRegex, function(match) {
-                    let ansText = match;
-                    if (answerParts.length === 1) {
-                        ansText = `${match.replace(/[（\(\)）]/g,'')}、${answerParts[0]}`;
-                    } else if (answerParts[partIndex]) {
-                        let cleanPart = answerParts[partIndex];
-                        if (cleanPart.startsWith('1') || cleanPart.startsWith('１') || cleanPart.startsWith(match.replace(/[（\(\)）]/g,''))) {
-                            ansText = cleanPart;
-                        } else {
-                            ansText = `${match.replace(/[（\(\)）]/g,'')}、${cleanPart}`;
-                        }
-                    }
-                    partIndex++;
-                    return `<span class="blank-word" onclick="toggleBlank(this)">${ansText}</span>`;
-                });
-            } else if (displayHtml.includes('【') && displayHtml.includes('】')) {
-                displayHtml = displayHtml.replace(/【(.*?)】/g, '<span class="blank-word" onclick="toggleBlank(this)">$1</span>');
-            } else if (item.answer && displayHtml.includes(item.answer)) {
-                const regex = new RegExp(item.answer, 'g');
-                displayHtml = displayHtml.replace(regex, `<span class="blank-word" onclick="toggleBlank(this)">${item.answer}</span>`);
-            } else if (item.answer) {
-                displayHtml += `<br><br>👉 正解: <span class="blank-word" onclick="toggleBlank(this)">${item.answer}</span>`;
-            }
-            
-            document.getElementById('card-text').innerHTML = displayHtml;
-            
-            const expBox = document.getElementById('explanation-box');
-            if (item.explanation) {
-                expBox.innerText = `💡 解説: ${item.explanation}`;
-                expBox.style.display = 'none';
-            } else {
-                expBox.style.display = 'none';
-            }
-        }
-
-        function toggleBlank(el) { el.classList.toggle('revealed'); }
-        
-        function toggleAllBlanks() {
-            const blanks = document.querySelectorAll('.blank-word');
-            const anyHidden = Array.from(blanks).some(b => !b.classList.contains('revealed'));
-            blanks.forEach(b => { if (anyHidden) { b.classList.add('revealed'); } else { b.classList.remove('revealed'); } });
-            
-            const expBox = document.getElementById('explanation-box');
-            if (expBox.innerText.trim() !== "解説文" && expBox.innerText.trim() !== "") {
-                expBox.style.display = anyHidden ? 'block' : 'none';
-            }
-        }
-
-        function nextCard() {
-            currentIndex++;
-            if (currentIndex < cardQueue.length) { showCard(); } else {
-                alert('すべてのカードの確認が終了しました！');
-                window.location.href = 'index.html';
-            }
-        }
-
-        function handleBackClick(event) {
-            if (appState === 'quiz') {
-                event.preventDefault();
-                if (confirm("暗記カードを終了してメニューに戻りますか？")) { window.location.href = 'index.html'; }
-            }
-        }
-
-        function updateBackButton() {
-            const textEl = document.getElementById("back-text");
-            textEl.innerText = appState === 'quiz' ? "中断してメニューへ" : "メニューへ戻る";
-        }
-    </script>
-</body>
-</html>
+        // ユーザーが作成した全20問のデータを完全格納！
+        const rawData = [
+          { page: 1, type: "呼吸器系", title: "かぜ症候群", text: "かぜ症候群とは、鼻腔、咽頭、喉頭などの上気道粘膜の（1）の総称で、80～90％が（2）感染に起因する。成人では（3）ウイルスが、小児では（4）ウイルスによるものが多い。", answers: "急性カタル性炎症|ウイルス|ライノ|RS" },
+          { page: 2, type: "呼吸器系", title: "インフルエンザ", text: "インフルエンザとは、（1）ウイルスの感染症で３型に分類される。このうち人の間で流行するのは、（2）型と（3）型である。典型的症状は、突然38度以上の高熱、頭痛、関節痛、筋肉痛、全身倦怠感などの（4）症状が、続いて（5）症状がみられる。", answers: "インフルエンザ|A|B|全身|上気道" },
+          { page: 3, type: "呼吸器系", title: "急性気管支炎", text: "急性気管支炎は、上気道のかぜ症候群が気管支に波及して発症したものである。気管支粘膜の炎症により（1）や（2）などの下気道症状や（3）をきたす。細菌性２次的感染を合併すると、（4）が認められる。胸部X線で肺に（5）は認められない。", answers: "咳嗽|痰|発熱|膿性痰|異常陰影" },
+          { page: 4, type: "呼吸器系", title: "肺炎", text: "肺炎とは、（1）に生じた炎症性疾患である。初期は、咳嗽、喀痰、発熱等の（2）様症状を呈し、進行により（3）、呼吸困難などをきたす。細菌性肺炎の場合、（4）痰となる。（5）肺炎が、次いで（6）肺炎が多い。", answers: "肺胞や肺間質|感冒|胸痛|膿性|肺炎球菌|マイコプラズマ" },
+          { page: 5, type: "呼吸器系", title: "肺結核", text: "肺結核は、（1）による呼吸器感染症で、飛沫核の（2）感染の様式をとる。全身症状には、持続する（3）、盗汗、全身倦怠感、体重減少などを、呼吸器症状では、（4）、（5）、血痰などを2週間以上呈する。肺結核では、胸部X線で肺野に浸潤影（6）や、（7）を認める。血液検査は（8）法、喀痰検査は（9）染色法で、遺伝子学的検査ではPCR法により結核菌を同定。", answers: "結核菌|空気|微熱|咳嗽|喀痰|乾
