@@ -31,16 +31,19 @@
         .start-btn:active { transform: scale(0.98); }
         .card-view, .setup-view, .loading-view { display: none; }
         .progress-bar { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-dim); font-weight: bold; margin-bottom: 10px; padding: 0 5px; }
-        .flashcard { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 24px; padding: 30px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 15px; min-height: 200px; display: flex; flex-direction: column; justify-content: center; }
-        .card-tag { font-size: 1.1rem; font-weight: 800; color: var(--accent-blue); display: block; text-align: center; margin-bottom: 15px; padding-bottom: 8px; border-bottom: 1px dashed var(--border-color); }
+        .flashcard { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 24px; padding: 30px 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.02); margin-bottom: 15px; min-height: 220px; display: flex; flex-direction: column; justify-content: center; }
+        .card-tag { font-size: 0.9rem; font-weight: 800; color: var(--text-dim); display: block; text-align: center; margin-bottom: 10px; }
         
-        /* 穴埋め画面専用のテキストスタイル */
-        .card-q-text { font-size: 1rem; color: var(--text-dim); margin-bottom: 15px; font-weight: 600; border-left: 3px solid #BDC3C7; padding-left: 10px; }
-        .card-text { font-size: 1.25rem; font-weight: 700; line-height: 1.8; margin: 0 0 20px 0; word-break: break-all; text-align: left; color: var(--text-main); }
+        /* 疾患名を真ん中寄せ、文章より大きめの文字に調整 */
+        .disease-name { font-size: 1.5rem; font-weight: 800; color: var(--accent-blue); text-align: center; margin: 5px 0 20px 0; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color); }
         
-        .explanation-box { background-color: #F8F9FA; border-left: 4px solid var(--accent-blue); padding: 12px 15px; font-size: 0.95rem; border-radius: 0 8px 8px 0; color: #566573; line-height: 1.5; font-weight: 600; display: none; }
-        .blank-word { background-color: #2C3E50; color: #2C3E50; padding: 2px 8px; margin: 0 3px; border-radius: 6px; cursor: pointer; font-weight: 800; transition: all 0.2s; border-bottom: 2px solid #1a252f; display: inline-block; line-height: 1.2; }
-        .blank-word.revealed { background-color: #FFF2CC; color: #D68910; border-bottom: 2px solid #F9E79F; }
+        .card-text { font-size: 1.15rem; font-weight: 700; line-height: 1.9; margin: 0 0 20px 0; word-break: break-all; text-align: left; color: var(--text-main); }
+        .explanation-box { background-color: #F8F9FA; border-left: 4px solid var(--accent-blue); padding: 12px 15px; font-size: 0.95rem; border-radius: 0 8px 8px 0; color: #566573; line-height: 1.5; font-weight: 600; display: none; margin-top: 10px; }
+        
+        /* 穴埋め部分のスタイル。タップするとその場で開く */
+        .blank-word { background-color: #2C3E50; color: #2C3E50; padding: 2px 6px; margin: 0 2px; border-radius: 6px; cursor: pointer; font-weight: 800; transition: all 0.2s; display: inline-block; line-height: 1.3; border-bottom: 2px solid #1a252f; }
+        .blank-word.revealed { background-color: #FFF2CC; color: #D68910; border-bottom: 2px solid #F9E79F; padding: 2px 8px; }
+        
         .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
         .action-btn { padding: 14px; font-size: 0.95rem; font-weight: 800; border-radius: 12px; border: 1px solid var(--border-color); cursor: pointer; background-color: #FFF; color: var(--text-main); transition: transform 0.1s; }
         .action-btn:active { transform: scale(0.98); }
@@ -59,7 +62,7 @@
         <div class="subtitle">穴埋め暗記カード</div>
 
         <div id="loading-view" class="loading-view" style="display: block;">
-            <div class="status-msg" id="loading-msg">⏳ CSV問題データを読み込んでいます...</div>
+            <div class="status-msg" id="loading-msg">⏳ CSV問題データ(data2.csv)を読み込んでいます...</div>
         </div>
 
         <div id="setup-view" class="setup-view">
@@ -87,8 +90,8 @@
             </div>
             <div class="flashcard">
                 <div class="card-tag" id="card-tag">カテゴリ</div>
-                <div class="card-q-text" id="card-q-text">〜はどれか？</div>
-                <div class="card-text" id="card-text">ここに穴埋め文章が入ります</div>
+                <div class="disease-name" id="disease-name">疾患名</div>
+                <div class="card-text" id="card-text">問題文</div>
                 <div class="explanation-box" id="explanation-box">解説文</div>
             </div>
             <div class="control-grid">
@@ -110,7 +113,7 @@
                 .then(text => {
                     parseCSV(text);
                     if(rawData.length === 0) {
-                        document.getElementById('loading-msg').innerHTML = '⚠️ 有効なデータが見つかりませんでした。';
+                        document.getElementById('loading-msg').innerHTML = '⚠️ data2.csv から有効なデータが見つかりませんでした。';
                     } else {
                         appState = 'setup'; 
                         generateCategoryOptions();
@@ -133,14 +136,15 @@
                 if (row.length >= 4) {
                     const category = clean(row[1]); 
                     const subcategory = clean(row[2]); 
-                    const question = clean(row[3]);
-                    const answer = row[5] ? clean(row[5]) : (row[4] ? clean(row[4]) : '');
+                    const question = clean(row[3]); // 例: 「気管支粘膜の炎症により（１）や（２）など」
+                    const answer = row[5] ? clean(row[5]) : (row[4] ? clean(row[4]) : ''); // 例: 「１、咳嗽 / ２、痰」または単一の答え
                     const explanation = row[6] ? clean(row[6]) : '';
                     
-                    if (question && answer) { 
+                    if (question) { 
                         rawData.push({ 
                             mainCategory: category, 
-                            tag: `${category} (${subcategory})`, 
+                            tag: `${category} ＞ ${subcategory}`, 
+                            disease: subcategory || "重要疾患", // 疾患名を中央に大きく出すために保持
                             question: question,
                             answer: answer,
                             explanation: explanation
@@ -183,96 +187,26 @@
             const item = cardQueue[currentIndex];
             document.getElementById('current-index').innerText = `カード ${currentIndex + 1} / ${cardQueue.length}`;
             document.getElementById('card-tag').innerText = item.tag;
+            document.getElementById('disease-name').innerText = item.disease; // 疾患名を中央にデカく表示！
             
-            // 1. 上部には「質問（〜はどれか？）」をサブ的に表示
-            document.getElementById('card-q-text').innerText = `❓ 問い: ${item.question}`;
+            let displayHtml = item.question;
             
-            // 2. メインの暗記文として「正解（answer）」を使い、その中の特定キーワードを自動的に隠す
-            let targetText = item.answer;
-            let displayHtml = "";
+            // 【パターンA】問題文の中に（１）や（２）、(1) や (2) が含まれている場合（インライン完全結合）
+            const numRegex = /([（\(][１２３４５６７８９０\d][）\)])/g;
             
-            // 疾患名や重要ワードを自動的に伏せ字（黒塗り）にするリスト
-            const keywords = [
-                "ライノウイルス", "肺炎球菌", "マイコプラズマ", "インフルエンザ菌", "血小板増多", "赤血球数", 
-                "頑固な咳", "高熱", "乾性咳", "慢性気管支炎", "動脈血酸素分圧", "CO2ナルコーシス", "1か月以上", 
-                "喫煙", "拘束性障害", "肺コンプライアンス", "細菌性肺炎", "ギラン・バレー", "散瞳", "スパイログラフィー", 
-                "眼裂狭小", "交感神経", "超音波検査", "緊張性気胸", "刺激性の咳", "肥満者", "胸痛", "筋緊張亢進", 
-                "身体各部", "高血糖", "月経異常", "下垂体前葉機能不全症", "眼球突出", "視力障害", "高身長", 
-                "脳腫瘍", "水制限試験", "頻脈", "手指振戦", "月経過多", "テタニー", "発汗過多", "体重減少", 
-                "男性", "アジソン病", "眼球陥凹", "腱反射亢進", "褐色細胞腫", "コン症候群", "シモンズ病", 
-                "原発性アルドステロン症", "色素沈着", "ナトリウムイオン", "多毛", "アルカローシス", "橋本病", "肥満"
-            ];
-            
-            let replaced = false;
-            
-            // もしデータ側にすでに【】がついていたらそれを優先
-            if (targetText.includes('【') && targetText.includes('】')) {
-                displayHtml = targetText.replace(/【(.*?)】/g, '<span class="blank-word" onclick="toggleBlank(this)">$1</span>');
-                replaced = true;
-            } else {
-                // キーワードリストに一致するものがあれば黒塗りに置換
-                for (let word of keywords) {
-                    if (targetText.includes(word)) {
-                        const regex = new RegExp(word, 'g');
-                        targetText = targetText.replace(regex, `<span class="blank-word" onclick="toggleBlank(this)">${word}</span>`);
-                        replaced = true;
-                    }
-                }
-                displayHtml = targetText;
-            }
-            
-            // 万が一キーワードに引っかからなかった場合は、文章の後半半分を丸ごと隠す
-            if (!replaced && targetText.length > 3) {
-                const half = Math.floor(targetText.length / 2);
-                const front = targetText.substring(0, half);
-                const back = targetText.substring(half);
-                displayHtml = `${front}<span class="blank-word" onclick="toggleBlank(this)">${back}</span>`;
-            }
-            
-            document.getElementById('card-text').innerHTML = `📢 正解の記述:<br> ${displayHtml}`;
-            
-            // 解説ボックスの設定
-            const expBox = document.getElementById('explanation-box');
-            if (item.explanation) {
-                expBox.innerText = `💡 解説: ${item.explanation}`;
-                expBox.style.display = 'none';
-            } else {
-                expBox.style.display = 'none';
-            }
-        }
-
-        function toggleBlank(el) { el.classList.toggle('revealed'); }
-        
-        function toggleAllBlanks() {
-            const blanks = document.querySelectorAll('.blank-word');
-            const anyHidden = Array.from(blanks).some(b => !b.classList.contains('revealed'));
-            blanks.forEach(b => { if (anyHidden) { b.classList.add('revealed'); } else { b.classList.remove('revealed'); } });
-            
-            const expBox = document.getElementById('explanation-box');
-            if (expBox.innerText.trim() !== "解説文" && expBox.innerText.trim() !== "") {
-                expBox.style.display = anyHidden ? 'block' : 'none';
-            }
-        }
-
-        function nextCard() {
-            currentIndex++;
-            if (currentIndex < cardQueue.length) { showCard(); } else {
-                alert('すべてのカードの確認が終了しました！');
-                window.location.href = 'index.html';
-            }
-        }
-
-        function handleBackClick(event) {
-            if (appState === 'quiz') {
-                event.preventDefault();
-                if (confirm("暗記カードを終了してメニューに戻りますか？")) { window.location.href = 'index.html'; }
-            }
-        }
-
-        function updateBackButton() {
-            const textEl = document.getElementById("back-text");
-            textEl.innerText = appState === 'quiz' ? "中断してメニューへ" : "メニューへ戻る";
-        }
-    </script>
-</body>
-</html>
+            if (numRegex.test(displayHtml) && item.answer) {
+                // カンマやスラッシュや読点で答えのパーツを分割する
+                const answerParts = item.answer.split(/[,、\/／\s]+/).map(p => p.trim());
+                let partIndex = 0;
+                
+                // 全ての（１）や（２）を、原文を維持したまま「（１、答え）」の形で黒塗りに変換！
+                displayHtml = item.question.replace(numRegex, function(match) {
+                    let ansText = match; // 万が一答えが足りない時のフォールバック
+                    
+                    if (answerParts.length === 1) {
+                        // 答えの列に1つしか書いてないが、パーツ内に「1、」「①」的なprefixが含まれているかチェック
+                        ansText = `${match.replace(/[（\(\)）]/g,'')}、${answerParts[0]}`;
+                    } else if (answerParts[partIndex]) {
+                        // 答えのパーツにすでに「１、咳嗽」と入っていればそのまま、入っていなければ合体
+                        let cleanPart = answerParts[partIndex];
+                        if (cleanPart.startsWith('1') || cleanPart.startsWith('１') || clean
