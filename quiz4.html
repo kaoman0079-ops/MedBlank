@@ -274,7 +274,6 @@
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
                 btn.innerText = opt;
-                // バグ原因だった箇所：安全にanswerを読み込めるように修正
                 btn.onclick = () => selectOption(btn, opt, item.answer, item.explanation);
                 optionsContainer.appendChild(btn);
             });
