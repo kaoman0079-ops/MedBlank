@@ -62,7 +62,7 @@
         </a>
 
         <h1>臨床医学各論</h1>
-        <div class="subtitle">4択演婚マスター</div>
+        <div class="subtitle">4択演習マスター</div>
 
         <div id="setup-view" class="setup-view" style="display: block;">
             <section>
@@ -115,7 +115,7 @@
         let appState = 'setup';
         let hasAnswered = false;
 
-        // 簡易CSVパース関数（クォーテーション内のカンマや改行に対応）
+        // CSVパース関数（データ読み込み時に各項目の前後の空白を自動で削除します）
         function parseCSV(text) {
             const lines = text.split(/\r?\n/);
             const result = [];
@@ -142,14 +142,18 @@
                 row.push(entries.trim());
                 
                 if (row.length >= 7) {
+                    // 選択肢をバラす際にも各選択肢の前後スペースを削る
+                    const rawChoices = row[4].split('|');
+                    const cleanedChoices = rawChoices.map(opt => opt.trim());
+
                     result.push({
-                        page: row[0],
-                        category: row[1],
-                        subcategory: row[2],
-                        question: row[3],
-                        choices: row[4].split('|'),
-                        answer: row[5],
-                        explanation: row[6]
+                        page: row[0].trim(),
+                        category: row[1].trim(),
+                        subcategory: row[2].trim(),
+                        question: row[3].trim(),
+                        choices: cleanedChoices,
+                        answer: row[5].trim(), // 正解の前後スペースを除去
+                        explanation: row[6].trim()
                     });
                 }
             }
@@ -170,7 +174,7 @@
                     initCategorySelect();
                 })
                 .catch(error => {
-                    alert(error.message + '\n※ローカルサーバー等を経由して開いているか確認してください。');
+                    alert(error.message + '\n※ファイルが正しい場所に配置されているか確認してください。');
                     console.error(error);
                 });
         };
@@ -239,7 +243,8 @@
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
                 btn.innerText = opt;
-                btn.onclick = () => selectOption(btn, opt, item.answer, item.explanation);
+                // 正解データ（item.answer）を確実にトリミングして渡す
+                btn.onclick = () => selectOption(btn, opt, item.answer.trim(), item.explanation);
                 optionsContainer.appendChild(btn);
             });
         }
@@ -250,10 +255,11 @@
             
             const buttons = document.querySelectorAll('.option-btn');
             buttons.forEach(btn => {
-                if (btn.innerText === correctAns) {
-                    btn.classList.add('correct');
+                // ボタンの文字と正解の文字、双方の空白を完全に削ってから比較判定
+                if (btn.innerText.trim() === correctAns.trim()) {
+                    btn.classList.add('correct'); // 正解を緑にする
                 } else if (btn === selectedBtn) {
-                    btn.classList.add('incorrect');
+                    btn.classList.add('incorrect'); // 選んだ不正解を赤にする
                 }
             });
             
