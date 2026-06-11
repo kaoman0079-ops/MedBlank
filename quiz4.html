@@ -9,7 +9,6 @@
             --main-bg: #F8F9FA;
             --card-bg: #FFFFFF;
             --accent-orange: #E67E22;
-            --accent-blue: #3498DB;
             --text-main: #2C3E50;
             --text-dim: #7F8C8D;
             --border-color: #E1E8ED;
@@ -44,7 +43,6 @@
         .option-btn.correct { background-color: #D4EFDF !important; color: #196F3D !important; border-color: #2ECC71 !important; }
         .option-btn.incorrect { background-color: #FADBD8 !important; color: #78281F !important; border-color: #E74C3C !important; }
         
-        /* 解説エリアのスタイル */
         .explanation-box { display: none; background-color: #FFF8E7; border: 1px solid #F5CBA7; border-radius: 16px; padding: 18px; margin-bottom: 15px; box-sizing: border-box; animation: fadeIn 0.3s ease; }
         .explanation-title { font-size: 0.95rem; font-weight: 800; color: #E67E22; margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
         .explanation-text { font-size: 1rem; font-weight: 700; line-height: 1.7; color: #5D6D7E; }
@@ -64,15 +62,13 @@
         </a>
 
         <h1>臨床医学各論</h1>
-        <div class="subtitle">4択演習マスター</div>
+        <div class="subtitle">4択演婚マスター</div>
 
         <div id="setup-view" class="setup-view" style="display: block;">
             <section>
                 <h3>出題カテゴリ</h3>
                 <select id="category-select" class="select-box">
-                    <option value="all">すべて（全20問）</option>
-                    <option value="呼吸器系">呼吸器系（1〜12）</option>
-                    <option value="内分泌系">内分泌系（13〜20）</option>
+                    <option value="">データを読み込み中...</option>
                 </select>
             </section>
             <section>
@@ -82,7 +78,7 @@
                         <input type="radio" name="order" value="shuffle" checked style="margin-right: 5px;">ランダム
                     </label>
                     <label style="background: #fff; border: 1px solid #ced4da; padding: 12px; text-align: center; border-radius: 12px; font-weight: bold; cursor: pointer;">
-                        <input type="radio" name="order" value="normal" style="margin-right: 5px;">標準順
+                        <input type="radio" name="order" value="normal" style="margin-right: 5px;">標準順（Page順）
                     </label>
                 </div>
             </section>
@@ -94,8 +90,8 @@
                 <span id="current-index">問題 1 / 10</span>
             </div>
             <div class="flashcard">
-                <div class="card-tag" id="card-tag">臨床医学各論</div>
-                <div class="disease-name" id="disease-name">疾患名</div>
+                <div class="card-tag" id="card-tag">カテゴリ</div>
+                <div class="disease-name" id="disease-name">サブカテゴリ</div>
                 <div class="card-text" id="card-text">問題文</div>
             </div>
             
@@ -103,7 +99,7 @@
 
             <div id="explanation-box" class="explanation-box">
                 <div class="explanation-title">💡 この疾患の重要ポイント解説</div>
-                <div id="explanation-text" class="explanation-text">ここに解説（穴埋めの完全文章など）が入ります。</div>
+                <div id="explanation-text" class="explanation-text">解説</div>
             </div>
 
             <div class="control-grid">
@@ -113,70 +109,142 @@
     </div>
 
     <script>
-        // 穴埋め用の完全な解説（文章）を内蔵した4択用データセット
-        const rawData = [
-          { type: "呼吸器系", title: "かぜ症候群", text: "かぜ症候群の原因や特徴について正しい記述はどれか。", options: ["急性カタル性炎症の総称で、80～90％がウイルス感染に起因する", "成人ではRSウイルスによる感染が最も多い", "小児ではライノウイルスによる感染が最も多い", "呼吸器系ではなく主に消化器系の急性炎症を指す"], answer: "急性カタル性炎症の総称で、80～90％がウイルス感染に起因する", note: "【重要文】かぜ症候群とは、鼻腔、咽頭、喉頭などの上気道粘膜の（急性カタル性炎症）の総称で、80～90％が（ウイルス）感染に起因する。成人では（ライノ）ウイルスが、小児では（RS）ウイルスによるものが多い。" },
-          { type: "呼吸器系", title: "インフルエンザ", text: "インフルエンザの症状の経過について正しいのはどれか。", options: ["初期に上気道症状がみられ、後半に高熱などの全身症状が出る", "突然38度以上の高熱や全身倦怠感などの全身症状がみられ、続いて上気道症状がみられる", "人の間で主に流行するのはC型インフルエンザである", "頭痛や関節痛などの全身症状を伴うことは極めて稀である"], answer: "突然38度以上の高熱や全身倦怠感などの全身症状がみられる、続いて上気道症状がみられる", note: "【重要文】インフルエンザとは、（インフルエンザ）ウイルスの感染症で３型に分類される。このうち人の間で流行するのは、（A）型と（B）型である。典型的症状は、突然38度以上の高熱、頭痛、関節痛、筋肉痛、全身倦怠感などの（全身）症状が、続いて（上気道）症状がみられる。" },
-          { type: "呼吸器系", title: "急性気管支炎", text: "急性気管支炎の臨床検査や症状について正しいのはどれか。", options: ["胸部X線検査で、肺野に明らかな異常陰影が認められる", "咳嗽や痰などの下気道症状や発熱をきたし、胸部X線で異常陰影は認められない", "細菌性2次的感染を合併すると、漿液性の無色透明な痰になる", "上気道のかぜ症候群が気管支に波及して発症することはない"], answer: "咳嗽や痰などの下気道症状や発熱をきたし、胸部X線で異常陰影は認められない", note: "【重要文】急性気管支炎は、上気道のかぜ症候群が気管支に波及して発症したものである。気管支粘膜の炎症により（咳嗽）や（痰）などの下気道症状や（発熱）をきたす。細菌性２次的感染を合併すると、（膿性痰）が認められる。胸部X線で肺に（異常陰影）は認められない。" },
-          { type: "呼吸器系", title: "肺炎", text: "肺炎の概要や分類について正しいのはどれか。", options: ["初期から激しい呼吸困難を呈し、感冒様の症状を経ることはない", "細菌性肺炎の場合、粘液性のさらさらした痰が特徴となる", "肺胞や肺間質に生じた炎症性疾患で、肺炎球菌肺炎、次いでマイコプラズマ肺炎が多い", "最も頻度が高いのはカビによる真菌性肺炎である"], answer: "肺胞や肺間質に生じた炎症性疾患で、肺炎球菌肺炎、次いでマイコプラズマ肺炎が多い", note: "【重要文】肺炎とは、（肺胞や肺間質）に生じた炎症性疾患である。初期は、咳嗽、喀痰、発熱等の（感冒）様症状を呈し、進行により（胸痛）、呼吸困難などをきたす。細菌性肺炎の場合、（膿性）痰となる。（肺炎球菌）肺炎が、次いで（マイコプラズマ）肺炎が多い。" },
-          { type: "呼吸器系", title: "肺結核", text: "肺結核の症状や検査法について正しいのはどれか。", options: ["主な感染様式は接触感染で、2日程度の短期間で症状が治まる", "血液検査はクウォンティフェロン法、喀痰検査はチール・ネールゼン染色法が用いられる", "胸部X線において肺野に透過性亢進（空気貯留）のみを認める", "遺伝子学的検査にはグラム染色法が第一選択となる"], answer: "血液検査はクウォンティフェロン法、喀痰検査はチール・ネールゼン染色法が用いられる", note: "【重要文】肺結核は、（結核菌）による呼吸器感染症で、飛沫核の（空気）感染の様式をとる。全身症状には持続する（微熱）、盗汗、全身倦怠、体重減少、呼吸器症状では（咳嗽）、（喀痰）、血痰などを2週間以上呈する。胸部X線で肺野に浸潤影（乾酪性肉芽腫）や、（空洞化）を認める。血液検査は（クウォンティフェロン）法、喀痰検査は（チール・ネールゼン）染色法、遺伝子学的検査ではPCR法により結核菌を同定。" },
-          { type: "呼吸器系", title: "慢性閉塞性肺疾患（COPD）", text: "COPDの機能検査や病態分類について正しいのはどれか。", options: ["肺機能検査において、1秒率が70%未満に低下する", "主な原因は飲酒であり、拘束性換気障害を主病態とする", "肺機能検査では、気道抵抗の減少による吸気時間の延長がみられる", "慢性気管支炎が原因となるものを『気腫優位型』と呼ぶ"], answer: "肺機能検査において、1秒率が70%未満に低下する", note: "【重要文】COPDの危険因子は（喫煙）で、気道・肺胞に（慢性炎症）が生じ、（気流制限）を有する疾患の総称。慢性的な（咳嗽）や（痰）、（労作時呼吸困難）を認め、肺機能検査では、気道抵抗増加による（呼気）の延長や、（1秒率）が（70）%未満と低下する。COPDは（慢性気管支炎）が原因となる気道病変優位型と、（肺気腫）が原因となる気腫優位型に分類される。" },
-          { type: "呼吸器系", title: "肺気腫", text: "肺気腫の身体的特徴やX線所見について正しいのはどれか。", options: ["十分な呼出を行うために「口すぼめ呼吸」を行い、ビア樽状胸郭がみられる", "残気量の減少に伴い、扁平な胸郭を呈する", "胸部X線では横隔膜の上昇と、滴状心の消失（心拡大）がみられる", "肺野での空気貯留が低下するため、X線の透過性が著しく減少する"], answer: "十分な呼出を行うために「口すぼめ呼吸」を行い、ビア樽状胸郭がみられる", note: "【重要文】肺気腫では、末梢気道が虚脱による閉塞で、気流制限が生じる。その為、十分な呼出をするために（口すぼめ）呼吸となる。また、（残気量）の増加により、（ビア樽）状胸郭となる。進行により低酸素血症から肺高血圧となり（右心不全）となる。胸部X線では、肺野の過膨張所見として、（横隔膜平旦化）、や（滴状心）がみられ、肺野での空気貯留により（透過性）が亢進する。" },
-          { type: "呼吸器系", title: "慢性気管支炎", text: "慢性気管支炎の定義およびケアについて正しいのはどれか。", options: ["1年間に3カ月以上続く咳嗽や喀痰が、2年以上続いている状態と定義される", "1年間に1カ月以上続く発熱が、3年以上続いている状態を指す", "呼吸リハビリテーションとしては、水分制限を主とした食事療法が行われる", "去痰を促すためのアプローチとして「体位排痰法」は禁忌である"], answer: "1年間に3カ月以上続く咳嗽や喀痰が、2年以上続いている状態と定義される", note: "【重要文】慢性気管支炎は、1年間に（3）カ月以上続く（咳嗽）や（喀痰）が、（2）年以上続いている状態と定義される。呼吸リハビリテーションとしては、去痰をうながす（体位排痰法）が行われる。" },
-          { type: "呼吸器系", title: "気管支喘息", text: "気管支喘息の病態や気流制限の特徴について正しいのはどれか。", options: ["好中球主体の急性感染症であり、不可逆性の気流制限を伴う", "好酸球やT細胞を主体とした気道の慢性炎症性疾患で、可逆性の気流制限を伴う", "発作時には喘鳴を伴う「吸気性」の呼吸困難をきたす", "気道の過敏性が著しく低下している状態を指す"], answer: "好酸球やT細胞を主体とした気道の慢性炎症性疾患で、可逆性の気流制限を伴う", note: "【重要文】気管支喘息は（好酸球）、Ｔ細胞を主体とした気道の（慢性炎症）性疾患。気道の（過敏）性亢進という特徴をもち、反復性の（可逆）性の気流制限を起こす。この気流制限を（喘息発作）といい、（喘鳴）を伴う（呼気性呼吸困難）をきたす。" },
-          { type: "呼吸器系", title: "特発性肺線維症", text: "特発性肺線維症の臨床所見について正しいのはどれか。", options: ["若年女性に多く、胸部CTでは肺上部に空気の塊（ブル）を認める", "50歳以上の男性喫煙者に多く、捻髪音の聴取や、胸部CTでの蜂巣肺がみられる", "湿性の激しい喀痰を伴う咳嗽が、発症初期からの主症状である", "肺の過膨張をきたすため、閉塞性換気障害（1秒率低下）を呈する"], answer: "50歳以上の男性喫煙者に多く、捻髪音の聴取や、胸部CTでの蜂巣肺がみられる", note: "【重要文】特発性肺線維症、50歳以上（男性）喫煙者に多く原因不明。喀痰を伴わない（乾性咳嗽）、発熱、徐々に増悪する（労作時呼吸困難）、（ばち指）がみられる。（捻髪音）を聴取し、胸部CTで肺底部（蜂巣肺）を認め（拘束性）換気障害をきたす。" },
-          { type: "呼吸器系", title: "原発性自然気胸", text: "原発性自然気胸の好発層と主症状について正しいのはどれか。", options: ["高齢の肥満女性に多く、徐々に進行する鈍痛が特徴である", "20歳前後の長身・やせ型の男性に多く、突然の胸痛と空咳がみられる", "発症時には激しい湿性咳嗽と多量の血痰を伴う", "特定の体型や年齢層による好発傾向は存在しない"], answer: "20歳前後の長身・やせ型の男性に多く、突然の胸痛と空咳がみられる", note: "【重要文】原発性自然気胸（20）歳前後の（長身）、（やせ）型の（男性）性に多い。突然出現する病側の（胸痛）と（空咳）、呼吸困難、動悸、不安感などを自覚する。" },
-          { type: "呼吸器系", title: "肺癌", text: "原発性肺癌の組織分類や悪性度について正しいのはどれか。", options: ["非小細胞癌のうち、腺癌が全組織型の中で最も悪性度が高い", "癌組織の特徴により小細胞癌と非小細胞癌に大別され、最も悪性度が高いのは小細胞癌である", "扁平上皮癌、腺癌、大細胞癌はすべて『小細胞癌』に分類される", "気管支や肺胞の「平滑筋細胞」を発生母地とする悪性腫瘍である"], answer: "癌組織の特徴により小細胞癌と非小細胞癌に大別され、最も悪性度が高いのは小細胞癌である", note: "【重要文】原発性肺癌は、気管支から肺胞までの（上皮細胞）を発生母地とし、癌組織の特徴により（小細胞）癌、（非小細胞）癌に大別され、後者には、（扁平上皮）癌、（腺）癌、（大細胞）癌がある。このうち最も悪性度が高いのが（小細胞）癌である。" },
-          { type: "内分泌系", title: "クッシング症候群・クッシング病", text: "クッシング症候群・クッシング病の症状として正しい記述はどれか。", options: ["コルチゾールの低下が原因で、下垂体腺腫による場合は『両耳側半盲』などを伴うことがある", "コルチゾールの過剰症で、満月様顔貌、中心性肥満、高血圧などがみられる", "下垂体腺腫からのACTH過剰分泌による病態を『褐色細胞腫』と呼ぶ", "皮膚が極端に乾燥し、削痩（著しい体重減少）をきたすのが特徴である"], answer: "コルチゾールの過剰症で、満月様顔貌、中心性肥満、高血圧などがみられる", note: "【重要文】クッシング症候群とは、慢性の（コルチゾール）の過剰症である。このうち、下垂体腺腫からの（ACTH）過剰分泌によるものを（クッシング病）という。症状には、（満月様）顔貌、（中心性）肥満、赤色皮膚線条、高血圧、月経異常や、下垂体腺腫による（両耳側）半盲などがある。" },
-          { type: "内分泌系", title: "先端巨大症、巨人症", text: "成長ホルモンの過剰分泌症とその発症時期による違いについて正しいのはどれか。", options: ["骨端線閉鎖前の過剰分泌では先端巨大症、閉鎖後では巨人症となる", "骨端線閉鎖前の過剰分泌では巨人症、閉鎖後では先端巨大症となる", "下垂体後葉から分泌されるオキシトシンの過剰分泌が本態である", "発症時期に関わらず、骨の過剰発育は一切みられない"], answer: "骨端線閉鎖前の過剰分泌では巨人症、閉鎖後では先端巨大症となる", note: "【重要文】下垂体前葉から分泌される（成長ホルモン）の分泌過剰症である。発症時期が骨端線の閉鎖前では、（巨人症）、閉鎖後では（先端巨大症）となる。" },
-          { type: "内分泌系", title: "尿崩症", text: "尿崩症の臨床特徴について正しいのはどれか。", options: ["下垂体後葉からの抗利尿ホルモン(ADH)の分泌障害で、多飲・多尿（1日3L以上）を呈する", "下垂体前葉の機能亢進により、尿量が1日1L未満に減少する", "尿細管での水分再吸収が亢進するため、著しい高張尿（濃い尿）となる", "主症状は乏尿と排尿痛であり、口渇を伴うことはない"], answer: "下垂体後葉からの抗利尿ホルモン(ADH)の分泌障害で、多飲・多尿（1日3L以上）を呈する", note: "【重要文】下垂体（後葉）から分泌される（抗利尿ホルモン）の分泌障害による疾患。（多飲）、（多尿）が主症状となり、口渇や口内灼熱感などを自覚する。1日の尿量が（3）㍑以上となり、尿は低張尿となる。" },
-          { type: "内分泌系", title: "バセドウ病", text: "バセドウ病の好発や、メルゼブルグの三徴候に該当する組み合わせはどれか。", options: ["20〜40歳代の女性に多く、びまん性甲状腺腫・眼球突出・頻脈がみられる", "高齢の男性に多く、結節性甲状腺腫・徐脈・皮膚乾燥がみられる", "自己免疫の低下ではなく、ヨードの過剰摂取のみが単独原因である", "三徴候とは、満月様顔貌・中心性肥満・赤色皮膚線条を指す"], answer: "20〜40歳代の女性に多く、びまん性甲状腺腫・眼球突出・頻脈がみられる", note: "【重要文】（自己免疫）異常により甲状腺機能亢進をきたした疾患で、びまん性甲状腺腫を伴う。20～40歳代の（女性）に多い。主な症状として、（メルゼブルグ）の三徴候として、（びまん性甲状腺腫）、（眼球突出）、（頻脈）を呈する。" },
-          { type: "内分泌系", title: "甲状腺機能低下症", text: "甲状腺機能低下症の各病態や症状について正しいのはどれか。", options: ["自己免疫が原因となる代表疾患は橋本病で、全身倦怠感や易疲労性、寒がりなどがみられる", "先天性の機能低下症は『粘液水腫』と呼び、成人のものは『クレチン病』と呼ぶ", "代謝が著しく亢進するため、体重減少や頻脈、多汗が主症状となる", "後天性の代表である橋本病では、甲状腺ホルモンが過剰に分泌される"], answer: "自己免疫が原因となる代表疾患は橋本病で、全身倦怠感や易疲労性、寒がりなどがみられる", note: "【重要文】甲状腺機能低下症には、先天性の（クレチン病）、成人に発症する後天性の（粘液水腫）、自己免疫が原因となる（橋本病）がある。症状として、（全身倦怠）、（易疲労性）、不活発、寒がりなどがみられる。" },
-          { type: "内分泌系", title: "原発性アルドステロン症", text: "原発性アルドステロン症（コン症候群）におけるホルモンの作用について正しいのはどれか。", options: ["アルドステロンは、尿中へのNaの排泄とKの再吸収を促進する", "アルドステロンは、尿細管でのNaの再吸収とKの排泄を促進し、高血圧をきたす", "副腎髄質から分泌されるホルモンで、低血圧症の原因となる", "糖質コルチゾールの分泌過剰によって引き起こされる疾患である"], answer: "アルドステロンは、尿細管でのNaの再吸収とKの排泄を促進し、高血圧をきたす", note: "【重要文】副腎皮質からアルドステロンが過剰に分泌される疾患で、別名（コン）症候群とよばれ、症候性（高血圧）症をきたす疾患の１つである。アルドステロンは、（Na）再吸収と（K）排泄促進作用をもつ。" },
-          { type: "内分泌系", title: "アジソン病", text: "アジソン病の病態やホルモンの動態について正しいのはどれか。", options: ["慢性の副腎皮質機能低下症で、コルチゾール等の低下により二次的にACTHが高値を呈する", "副腎髄質の腫瘍が原因で、カテコールアミンが著しく上昇する疾患である", "症候性『高血圧症』を引き起こす代表的な疾患である", "フィードバック機構により、下垂体からのACTH分泌は著しく低下する"], answer: "慢性の副腎皮質機能低下症で、コルチゾール等の低下により二次的にACTHが高値を呈する", note: "【重要文】慢性（副腎皮質）機能低下により副腎皮質ホルモン（コルチゾール、アルドステロン、副腎アンドロゲン）分泌低下をきたす疾患。二次的に（ACTH）高値を呈する。症候性（低血圧）症原因疾患の１つである。" },
-          { type: "内分泌系", title: "褐色細胞腫", text: "褐色細胞腫の特徴や、いわゆる「5H症状」について正しいのはどれか。", options: ["クロム親和性細胞から発生し、カテコールアミン過剰により高血圧や高血糖（5H症状）をきたす", "副腎皮質の腫瘍で、アルドステロンの分泌低下による低血圧が主徴である", "5H症状の『H』には、低張尿(Hypotonic urine)や徐脈(Heart block)が含まれる", "カテコールアミンの分泌が著しく枯渇（低下）する疾患である"], answer: "クロム親和性細胞から発生し、カテコールアミン過剰により高血圧や高血糖（5H症状）をきたす", note: "【重要文】クロム親和性細胞から発生する腫瘍で、（カテコールアミン）を過剰に産生・分泌する。５H症状として、（高血圧）、（高血糖）、（代謝亢進）、（頭痛）、（多汗）がある。" }
-        ];
+        let parsedQuestions = [];
+        let quizQueue = [];
+        let currentIndex = 0;
+        let appState = 'setup';
+        let hasAnswered = false;
 
-        let quizQueue = []; let currentIndex = 0; let appState = 'setup'; let hasAnswered = false;
+        // 簡易CSVパース関数（クォーテーション内のカンマや改行に対応）
+        function parseCSV(text) {
+            const lines = text.split(/\r?\n/);
+            const result = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                
+                const row = [];
+                let insideQuote = false;
+                let entries = '';
+                
+                for (let j = 0; j < line.length; j++) {
+                    const char = line[j];
+                    if (char === '"') {
+                        insideQuote = !insideQuote;
+                    } else if (char === ',' && !insideQuote) {
+                        row.push(entries.trim());
+                        entries = '';
+                    } else {
+                        entries += char;
+                    }
+                }
+                row.push(entries.trim());
+                
+                if (row.length >= 7) {
+                    result.push({
+                        page: row[0],
+                        category: row[1],
+                        subcategory: row[2],
+                        question: row[3],
+                        choices: row[4].split('|'),
+                        answer: row[5],
+                        explanation: row[6]
+                    });
+                }
+            }
+            return result;
+        }
+
+        // ページ読み込み時に data.csv を非同期で取得する処理
+        window.onload = function() {
+            fetch('data.csv')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('CSVファイルの読み込みに失敗しました。');
+                    }
+                    return response.text();
+                })
+                .then(csvText => {
+                    parsedQuestions = parseCSV(csvText);
+                    initCategorySelect();
+                })
+                .catch(error => {
+                    alert(error.message + '\n※ローカルサーバー等を経由して開いているか確認してください。');
+                    console.error(error);
+                });
+        };
+
+        // カテゴリ選択ボックスの生成
+        function initCategorySelect() {
+            const categories = [...new Set(parsedQuestions.map(q => q.category))];
+            const selectEl = document.getElementById('category-select');
+            selectEl.innerHTML = `<option value="all">すべて（全 ${parsedQuestions.length} 問）</option>`;
+            
+            categories.forEach(cat => {
+                const count = parsedQuestions.filter(q => q.category === cat).length;
+                selectEl.innerHTML += `<option value="${cat}">${cat}（${count}問）</option>`;
+            });
+        }
 
         function startQuiz() {
+            if (parsedQuestions.length === 0) {
+                alert("データが読み込まれていません。");
+                return;
+            }
+
             const selectedCategory = document.getElementById('category-select').value;
             const order = document.querySelector('input[name="order"]:checked').value;
             
-            quizQueue = selectedCategory === 'all' ? [...rawData] : rawData.filter(item => item.type === selectedCategory);
+            quizQueue = selectedCategory === 'all' ? [...parsedQuestions] : parsedQuestions.filter(item => item.category === selectedCategory);
             
-            if (order === 'shuffle') quizQueue.sort(() => Math.random() - 0.5);
-            currentIndex = 0; appState = 'quiz';
+            if (order === 'shuffle') {
+                quizQueue.sort(() => Math.random() - 0.5);
+            } else {
+                quizQueue.sort((a, b) => Number(a.page) - Number(b.page));
+            }
+            
+            if (quizQueue.length === 0) {
+                alert("選択されたカテゴリに問題がありません。");
+                return;
+            }
+            
+            currentIndex = 0;
+            appState = 'quiz';
             document.getElementById('setup-view').style.display = 'none';
             document.getElementById('card-view').style.display = 'block';
-            updateBackButton(); showQuestion();
+            updateBackButton();
+            showQuestion();
         }
 
         function showQuestion() {
             hasAnswered = false;
             const item = quizQueue[currentIndex];
-            document.getElementById('current-index').innerText = `問題 ${currentIndex + 1} / ${quizQueue.length}`;
-            document.getElementById('card-tag').innerText = `臨床医学各論 ＞ ${item.type}`;
-            document.getElementById('disease-name').innerText = item.title;
-            document.getElementById('card-text').innerText = item.text;
             
-            // 次へボタンと解説ボックスをいったん隠す
+            document.getElementById('current-index').innerText = `問題 ${currentIndex + 1} / ${quizQueue.length}`;
+            document.getElementById('card-tag').innerText = `臨床医学各論 ＞ ${item.category}`;
+            document.getElementById('disease-name').innerText = item.subcategory;
+            document.getElementById('card-text').innerText = item.question;
+            
             document.getElementById('next-btn').style.display = 'none';
             document.getElementById('explanation-box').style.display = 'none';
             
             const optionsContainer = document.getElementById('quiz-options');
             optionsContainer.innerHTML = '';
             
-            item.options.forEach(opt => {
+            // 選択肢のシャッフル
+            const shuffledOptions = [...item.choices].sort(() => Math.random() - 0.5);
+            
+            shuffledOptions.forEach(opt => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn';
                 btn.innerText = opt;
-                btn.onclick = () => selectOption(btn, opt, item.answer, item.note);
+                btn.onclick = () => selectOption(btn, opt, item.answer, item.explanation);
                 optionsContainer.appendChild(btn);
             });
         }
 
-        function selectOption(selectedBtn, chosenOpt, correctAns, noteText) {
+        function selectOption(selectedBtn, chosenOpt, correctAns, expText) {
             if (hasAnswered) return;
             hasAnswered = true;
             
@@ -189,25 +257,27 @@
                 }
             });
             
-            // 解答した瞬間に、内蔵されたきれいな解説文を表示！
-            document.getElementById('explanation-text').innerText = noteText;
+            document.getElementById('explanation-text').innerText = expText;
             document.getElementById('explanation-box').style.display = 'block';
-            
             document.getElementById('next-btn').style.display = 'block';
         }
 
         function nextQuestion() {
             currentIndex++;
-            if (currentIndex < quizQueue.length) { showQuestion(); } else {
+            if (currentIndex < quizQueue.length) {
+                showQuestion();
+            } else {
                 alert('すべての問題が終了しました！お疲れ様でした！');
-                window.location.href = 'index.html';
+                location.reload();
             }
         }
 
         function handleBackClick(event) {
             if (appState === 'quiz') {
                 event.preventDefault();
-                if (confirm("演習を中断してメニューに戻りますか？")) { window.location.href = 'index.html'; }
+                if (confirm("演習を中断してメニューに戻りますか？")) {
+                    location.reload();
+                }
             }
         }
 
