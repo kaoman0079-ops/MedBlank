@@ -140,7 +140,7 @@
         let parsedQuestions = [];
         let quizQueue = [];
         let currentIndex = 0;
-        let correctCount = 0; // 正解数をカウントする変数
+        let correctCount = 0;
         let appState = 'setup';
         let hasAnswered = false;
 
@@ -175,4 +175,208 @@
                     const cleanedChoices = rawChoices.map(opt => opt.trim());
 
                     result.push({
-                        page: row
+                        page: row[0].trim(),
+                        category: row[1].trim(),
+                        subcategory: row[2].trim(),
+                        question: row[3].trim(),
+                        choices: cleanedChoices,
+                        answer: row[5].trim(),
+                        explanation: row[6].trim()
+                    });
+                }
+            }
+            return result;
+        }
+
+        // ページ読み込み時に data.csv を非同期で取得
+        window.onload = function() {
+            fetch('data.csv')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('CSVファイルの読み込みに失敗しました。');
+                    }
+                    return response.text();
+                })
+                .then(csvText => {
+                    parsedQuestions = parseCSV(csvText);
+                    initCategorySelect();
+                })
+                .catch(error => {
+                    alert(error.message + '\n※ファイルが正しい場所に配置されているか確認してください。');
+                    console.error(error);
+                });
+        };
+
+        // カテゴリ選択ボックスの生成
+        function initCategorySelect() {
+            const categories = [...new Set(parsedQuestions.map(q => q.category))];
+            const selectEl = document.getElementById('category-select');
+            selectEl.innerHTML = `<option value="all">すべて（全 ${parsedQuestions.length} 問）</option>`;
+            
+            categories.forEach(cat => {
+                const count = parsedQuestions.filter(q => q.category === cat).length;
+                selectEl.innerHTML += `<option value="${cat}">${cat}（${count}問）</option>`;
+            });
+            appState = 'setup';
+            updateBackButton();
+        }
+
+        function startQuiz() {
+            if (parsedQuestions.length === 0) {
+                alert("データが読み込まれていません。");
+                return;
+            }
+
+            const selectedCategory = document.getElementById('category-select').value;
+            const order = document.querySelector('input[name="order"]:checked').value;
+            
+            quizQueue = selectedCategory === 'all' ? [...parsedQuestions] : parsedQuestions.filter(item => item.category === selectedCategory);
+            
+            if (order === 'shuffle') {
+                quizQueue.sort(() => Math.random() - 0.5);
+            } else {
+                quizQueue.sort((a, b) => Number(a.page) - Number(b.page));
+            }
+            
+            if (quizQueue.length === 0) {
+                alert("選択されたカテゴリに問題がありません。");
+                return;
+            }
+            
+            currentIndex = 0;
+            correctCount = 0;
+            appState = 'quiz';
+            document.getElementById('setup-view').style.display = 'none';
+            document.getElementById('result-view').style.display = 'none';
+            document.getElementById('card-view').style.display = 'block';
+            updateBackButton();
+            showQuestion();
+        }
+
+        function showQuestion() {
+            hasAnswered = false;
+            const item = quizQueue[currentIndex];
+            
+            document.getElementById('current-index').innerText = `問題 ${currentIndex + 1} / ${quizQueue.length}`;
+            document.getElementById('card-tag').innerText = `臨床医学各論 ＞ ${item.category}`;
+            document.getElementById('disease-name').innerText = item.subcategory;
+            document.getElementById('card-text').innerText = item.question;
+            
+            document.getElementById('next-btn').style.display = 'none';
+            document.getElementById('explanation-box').style.display = 'none';
+            
+            const optionsContainer = document.getElementById('quiz-options');
+            optionsContainer.innerHTML = '';
+            
+            const shuffledOptions = [...item.choices].sort(() => Math.random() - 0.5);
+            
+            shuffledOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                // バグ原因だった箇所：安全にanswerを読み込めるように修正
+                btn.onclick = () => selectOption(btn, opt, item.answer, item.explanation);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function selectOption(selectedBtn, chosenOpt, correctAns, expText) {
+            if (hasAnswered) return;
+            hasAnswered = true;
+            
+            let isCorrect = false;
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(btn => {
+                if (btn.innerText.trim() === correctAns.trim()) {
+                    btn.classList.add('correct');
+                    if (btn === selectedBtn) {
+                        isCorrect = true;
+                    }
+                } else if (btn === selectedBtn) {
+                    btn.classList.add('incorrect');
+                }
+            });
+            
+            if (isCorrect) {
+                correctCount++;
+            }
+            
+            document.getElementById('explanation-text').innerText = expText;
+            document.getElementById('explanation-box').style.display = 'block';
+            document.getElementById('next-btn').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentIndex++;
+            if (currentIndex < quizQueue.length) {
+                showQuestion();
+            } else {
+                showFinalResult();
+            }
+        }
+
+        function showFinalResult() {
+            appState = 'result';
+            document.getElementById('card-view').style.display = 'none';
+            document.getElementById('result-view').style.display = 'block';
+            updateBackButton();
+            
+            document.getElementById('result-score').innerText = `${correctCount} / ${quizQueue.length}`;
+            
+            const rate = (correctCount / quizQueue.length) * 100;
+            let comment = "お疲れ様でした！";
+            if (rate === 100) {
+                comment = "素晴らしい！全問正解です！ 🎉";
+            } else if (rate >= 80) {
+                comment = "高得点です！その調子です！ 👍";
+            } else if (rate >= 50) {
+                comment = "ナイスファイト！復習を重ねていきましょう！ 💪";
+            } else {
+                comment = "まずは一歩ずつ！解説を読み直してみましょう。 📖";
+            }
+            document.getElementById('result-comment').innerText = comment;
+        }
+
+        function retryQuiz() {
+            const order = document.querySelector('input[name="order"]:checked').value;
+            if (order === 'shuffle') {
+                quizQueue.sort(() => Math.random() - 0.5);
+            }
+            currentIndex = 0;
+            correctCount = 0;
+            appState = 'quiz';
+            document.getElementById('result-view').style.display = 'none';
+            document.getElementById('card-view').style.display = 'block';
+            updateBackButton();
+            showQuestion();
+        }
+
+        function backToSetup() {
+            appState = 'setup';
+            document.getElementById('result-view').style.display = 'none';
+            document.getElementById('setup-view').style.display = 'block';
+            updateBackButton();
+        }
+
+        function handleBackClick(event) {
+            if (appState === 'quiz' || appState === 'result') {
+                event.preventDefault();
+                if (confirm("演習を終了してトップに戻りますか？")) {
+                    backToSetup();
+                }
+            }
+        }
+
+        function updateBackButton() {
+            const textEl = document.getElementById("back-text");
+            if (appState === 'quiz') {
+                textEl.innerText = "中断してメニューへ";
+            } else if (appState === 'result') {
+                textEl.innerText = "結果を閉じて戻る";
+            } else {
+                textEl.innerText = "メニューへ戻る";
+            }
+        }
+    </script>
+</body>
+</html>
